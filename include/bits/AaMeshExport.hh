@@ -48,22 +48,22 @@ namespace Aa
 // export_off //////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-    void export_vrml_vertex (ostream & o, const BasicVertex & v)
+    void export_vrml_vertex (std::ostream & o, const BasicVertex & v)
     {
-      o << "        " << v.coords [0] << ' ' << v.coords [1] << ' ' << v.coords [2] << endl;
+      o << "        " << v.coords [0] << ' ' << v.coords [1] << ' ' << v.coords [2] << std::endl;
     }
 
-    void export_vrml_triangle (ostream & o, const BasicTriangle & t)
+    void export_vrml_triangle (std::ostream & o, const BasicTriangle & t)
     {
-      o << "      " << t.indices [0] << ", " << t.indices [1] << ", " << t.indices [2] << ", -1\n";
+      o << "      " << t.indices [0] << ", " << t.indices [1] << ", " << t.indices [2] << ", -1" << std::endl;
     }
 
-    void export_vrml (const BasicMesh * mesh, const string & filename)
+    void export_vrml (const BasicMesh * mesh, const std::string & filename)
     {
-      const vector<BasicVertex>   & vertices  = mesh->getVertices ();
-      const vector<BasicTriangle> & triangles = mesh->getTriangles ();
+      const std::vector<BasicVertex>   & vertices  = mesh->vertices ();
+      const std::vector<BasicTriangle> & triangles = mesh->triangles ();
 
-      ofstream of (filename.c_str ());
+      std::ofstream of (filename.c_str ());
       of << "#VRML V2.0 utf8\n"
          << "Shape {\n"
          << "  appearance Appearance {\n"
