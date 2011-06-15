@@ -75,7 +75,7 @@ namespace Aa
       if (! vertices.empty ())
       {
         export_vrml_vertex (of, vertices [0]);
-        for (int i = 1; i < vertices.size ();) export_vrml_vertex (of, vertices [i++]);
+        for (unsigned int i = 1; i < vertices.size ();) export_vrml_vertex (of, vertices [i++]);
       }
       of << "      ]\n"
          << "    }\n"
@@ -83,7 +83,7 @@ namespace Aa
       if (! triangles.empty ())
       {
         export_vrml_triangle (of, triangles [0]);
-        for (int i = 1; i < triangles.size ();) export_vrml_triangle (of, triangles [i++]);
+        for (unsigned int i = 1; i < triangles.size ();) export_vrml_triangle (of, triangles [i++]);
       }
       of << "    ]\n"
          << "  }\n"
