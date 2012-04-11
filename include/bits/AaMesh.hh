@@ -2,6 +2,7 @@
 #define __AA_MESH__
 
 #include <vector>
+#include <AaVector>
 //#include <stdexcept>
 
 namespace Aa 
@@ -59,14 +60,16 @@ namespace Aa
     class BasicVertex
     {
       public:
-        double coords [3];
+        dvec3 coords;
 
       public:
-        BasicVertex (double x, double y, double z)
+        BasicVertex (const dvec3 & v) :
+          coords (v)
         {
-          coords [0] = x;
-          coords [1] = y;
-          coords [2] = z;
+        }
+        BasicVertex (double x, double y, double z) :
+          coords (vec (x, y, z))
+        {
         }
         virtual ~BasicVertex () {}
     };
@@ -76,14 +79,16 @@ namespace Aa
     class BasicTriangle
     {
       public:
-        int indices [3];
+        ivec3 indices;
 
       public:
-        BasicTriangle (int a, int b, int c)
+        BasicTriangle (const ivec3 & v) :
+          indices (v)
         {
-          indices [0] = a;
-          indices [1] = b;
-          indices [2] = c;
+        }
+        BasicTriangle (int a, int b, int c) :
+          indices (vec (a, b, c))
+        {
         }
         virtual ~BasicTriangle () {}
     };
