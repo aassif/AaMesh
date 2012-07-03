@@ -4,7 +4,6 @@
 #include <set>
 #include <map>
 #include <list>
-#include "AaMesh"
 
 #include <iostream>
 
@@ -115,7 +114,7 @@ namespace Aa
         int ma = this->registerVertex (m, a);
         int mb = this->registerVertex (m, b);
         int mc = this->registerVertex (m, c);
-        m->addTriangle (typename M::Triangle (ma, mb, mc));
+        m->addTriangle (typename M::Triangle (vec (ma, mb, mc)));
       }
 
       // Connected component separation.

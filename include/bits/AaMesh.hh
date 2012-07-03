@@ -1,9 +1,8 @@
-#ifndef __AA_MESH__
-#define __AA_MESH__
+#ifndef AA_MESH__H
+#define AA_MESH__H
 
 #include <vector>
 #include <AaVector>
-//#include <stdexcept>
 
 namespace Aa 
 {
@@ -24,35 +23,58 @@ namespace Aa
 
       public:
         // Constructor.
-        TMesh (int v = 0, int t = 0) {m_v.reserve (v); m_t.reserve (t);}
+        inline
+        TMesh (AaUInt v = 0, AaUInt t = 0)
+        {
+          m_v.reserve (v);
+          m_t.reserve (t);
+        }
 
         // Destructor.
-        virtual ~TMesh () {}
+        inline
+        virtual ~TMesh ()
+        {
+        }
 
         // Clean-up.
-        virtual void clear () {m_v.clear (); m_t.clear ();}
+        inline
+        virtual void clear ()
+        {
+          m_v.clear ();
+          m_t.clear ();
+        }
 
         // Vertices.
-        const std::vector<Vertex> & vertices () const {return m_v;}
-        /***/ std::vector<Vertex> & vertices () /***/ {return m_v;}
+        inline const std::vector<Vertex> & vertices () const {return m_v;}
+        inline /***/ std::vector<Vertex> & vertices () /***/ {return m_v;}
 
         // Access to a vertex.
-        virtual const Vertex & vertex (int k) const {return m_v [k];}
-        virtual /***/ Vertex & vertex (int k) /***/ {return m_v [k];}
+        inline const Vertex & vertex (AaUInt k) const {return m_v [k];}
+        inline /***/ Vertex & vertex (AaUInt k) /***/ {return m_v [k];}
 
         // Add a new vertex.
-        virtual int addVertex (const Vertex & v) {int n = m_v.size (); m_v.push_back (v); return n;}
+        inline virtual AaUInt addVertex (const Vertex & v)
+        {
+          AaUInt n = m_v.size ();
+          m_v.push_back (v);
+          return n;
+        }
 
         // Triangles.
-        const std::vector<Triangle> & triangles () const {return m_t;}
-        /***/ std::vector<Triangle> & triangles () /***/ {return m_t;}
+        inline const std::vector<Triangle> & triangles () const {return m_t;}
+        inline /***/ std::vector<Triangle> & triangles () /***/ {return m_t;}
 
         // Access to a triangle.
-        virtual const Triangle & triangle (int k) const {return m_t [k];}
-        virtual /***/ Triangle & triangle (int k) /***/ {return m_t [k];}
+        inline const Triangle & triangle (AaUInt k) const {return m_t [k];}
+        inline /***/ Triangle & triangle (AaUInt k) /***/ {return m_t [k];}
 
         // Add a new triangle.
-        virtual int addTriangle (const Triangle & t) {int n = m_t.size (); m_t.push_back (t); return n;}
+        inline virtual AaUInt addTriangle (const Triangle & t)
+        {
+          AaUInt n = m_t.size ();
+          m_t.push_back (t);
+          return n;
+        }
     };
 
     /** BasicVertex */
@@ -63,15 +85,11 @@ namespace Aa
         dvec3 coords;
 
       public:
+        inline
         BasicVertex (const dvec3 & v) :
           coords (v)
         {
         }
-        BasicVertex (double x, double y, double z) :
-          coords (vec (x, y, z))
-        {
-        }
-        virtual ~BasicVertex () {}
     };
 
     /** BasicTriangle */
@@ -82,21 +100,39 @@ namespace Aa
         ivec3 indices;
 
       public:
+        inline
         BasicTriangle (const ivec3 & v) :
           indices (v)
         {
         }
-        BasicTriangle (int a, int b, int c) :
-          indices (vec (a, b, c))
-        {
-        }
-        virtual ~BasicTriangle () {}
     };
 
     /** BasicMesh */
 
     typedef TMesh<BasicVertex, BasicTriangle> BasicMesh;
+
+    /** NormalVertex */
+
+    class NormalVertex : public BasicVertex
+    {
+      public:
+        dvec3 normal;
+
+      public:
+        inline
+        NormalVertex (const dvec3 & p, const dvec3 & n) :
+          BasicVertex (p),
+          normal (n)
+        {
+        }
+    };
+
+    /** NormalMesh */
+
+    typedef TMesh<NormalVertex, BasicTriangle> NormalMesh;
+
+
   } // namespace Mesh
 } // namespace Aa
 
-#endif // __AA_MESH__
+#endif // AA_MESH__H
