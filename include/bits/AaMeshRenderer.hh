@@ -8,7 +8,9 @@ namespace Aa
   namespace Mesh
   {
 
-    /** MeshRenderer */
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TMeshRenderer<M> //////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
     template <class M>
     class TMeshRenderer
@@ -70,30 +72,44 @@ namespace Aa
           {
             SetPointers  (m_mesh->vertices ());
             DrawElements (m_mesh->triangles ());
+            glBindBuffer (GL_ARRAY_BUFFER, 0);
+            glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
           }
         }
     };
 
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::BasicMeshRenderer /////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    typedef TMeshRenderer<BasicMesh> BasicMeshRenderer;
+
     template <>
     inline
-    void TMeshRenderer<BasicMesh>::SetPointers (GLuint id, const BasicVertex * p)
+    void BasicMeshRenderer::SetPointers (GLuint id, const BasicVertex * p)
     {
       glBindBuffer (GL_ARRAY_BUFFER, id);
       glEnableClientState (GL_VERTEX_ARRAY);
-      glVertexPointer (3, GL_DOUBLE, sizeof (BasicVertex), &(p->coords));
+      glVertexPointer (3, GL_FLOAT, sizeof (BasicVertex), &(p->coords));
     }
 
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::NormalMeshRenderer<M> /////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    typedef TMeshRenderer<NormalMesh> NormalMeshRenderer;
+
     template <>
     inline
-    void TMeshRenderer<NormalMesh>::SetPointers (GLuint id, const NormalVertex * p)
+    void NormalMeshRenderer::SetPointers (GLuint id, const NormalVertex * p)
     {
       glBindBuffer (GL_ARRAY_BUFFER, id);
 
       glEnableClientState (GL_VERTEX_ARRAY);
-      glVertexPointer (3, GL_DOUBLE, sizeof (NormalVertex), &(p->coords));
+      glVertexPointer (3, GL_FLOAT, sizeof (NormalVertex), &(p->coords));
 
       glEnableClientState (GL_NORMAL_ARRAY);
-      glNormalPointer    (GL_DOUBLE, sizeof (NormalVertex), &(p->normal));
+      glNormalPointer    (GL_FLOAT, sizeof (NormalVertex), &(p->normal));
     }
 
   } // namespace Mesh

@@ -82,11 +82,11 @@ namespace Aa
     class BasicVertex
     {
       public:
-        dvec3 coords;
+        vec3 coords;
 
       public:
         inline
-        BasicVertex (const dvec3 & v) :
+        BasicVertex (const vec3 & v) :
           coords (v)
         {
         }
@@ -116,11 +116,11 @@ namespace Aa
     class NormalVertex : public BasicVertex
     {
       public:
-        dvec3 normal;
+        vec3 normal;
 
       public:
         inline
-        NormalVertex (const dvec3 & p, const dvec3 & n) :
+        NormalVertex (const vec3 & p, const vec3 & n) :
           BasicVertex (p),
           normal (n)
         {

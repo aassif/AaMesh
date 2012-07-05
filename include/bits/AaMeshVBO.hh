@@ -6,7 +6,9 @@ namespace Aa
   namespace Mesh
   {
 
-    /** VBO */
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::VBO ///////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
     class VBO
     {
@@ -70,7 +72,9 @@ namespace Aa
         }
     };
 
-    /** TMeshVBO */
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TMeshVBO<M> ///////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
     template <class M>
     class TMeshVBO :
@@ -98,9 +102,9 @@ namespace Aa
           std::vector<GLuint> indices (3 * t.size ());
           for (AaUInt i = 0; i < t.size (); ++i)
           {
-            indices [3*i+0] = t[i].indices[0];
-            indices [3*i+1] = t[i].indices[1];
-            indices [3*i+2] = t[i].indices[2];
+            indices [3*i + 0] = t[i].indices[0];
+            indices [3*i + 1] = t[i].indices[1];
+            indices [3*i + 2] = t[i].indices[2];
           }
 
           return VBO::ElementArray (indices, usage);
@@ -169,9 +173,34 @@ namespace Aa
           {
             SetPointers  (m_vertices);
             DrawElements (m_triangles);
+            glBindBuffer (GL_ARRAY_BUFFER, 0);
+            glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
+          }
+        }
+
+        inline
+        void draw_points ()
+        {
+          if (TMeshRenderer<M>::m_mesh != NULL)
+          {
+            SetPointers (m_vertices);
+            glDrawArrays (GL_POINTS, 0, m_vertices->count);
+            glBindBuffer (GL_ARRAY_BUFFER, 0);
           }
         }
     };
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::BasicMeshVBO //////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    typedef TMeshVBO<BasicMesh> BasicMeshVBO;
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::NormalMeshVBO /////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    typedef TMeshVBO<NormalMesh> NormalMeshVBO;
 
   } // namespace Mesh
 } // namespace Aa

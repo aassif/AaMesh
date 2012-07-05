@@ -17,7 +17,7 @@ namespace Aa
 
       private:
         inline static
-        Vertex CreateVertex (double theta, double rho, const dvec3 & normal);
+        Vertex CreateVertex (double theta, double rho, const vec3 & normal);
 
       public:
         inline static
@@ -25,10 +25,10 @@ namespace Aa
         {
           M * m = new M;
 
-          const dvec3 normal = vec (0.0, 0.0, up ? +1.0 : -1.0);
+          const vec3 normal = vec (0.0, 0.0, up ? +1.0 : -1.0);
 
           typedef std::vector<AaUInt> Ring;
-          std::vector<Ring> rings (nRings);
+          std::vector<Ring> rings (nRings + 1);
 
           rings [0].push_back (m->addVertex (CreateVertex (0.0, 0.0, normal)));
 
@@ -71,9 +71,9 @@ namespace Aa
 
     template <>
     inline
-    BasicVertex BasicDisk::CreateVertex (double theta, double rho, const dvec3 &)
+    BasicVertex BasicDisk::CreateVertex (double theta, double rho, const vec3 &)
     {
-      dvec3 p = rho * vec (std::sin (theta), std::cos (theta), 0.0);
+      vec3 p = rho * vec (std::sin (theta), std::cos (theta), 0.0);
       return BasicVertex (p);
     }
 
@@ -83,9 +83,9 @@ namespace Aa
 
     template <>
     inline
-    NormalVertex NormalDisk::CreateVertex (double theta, double rho, const dvec3 & normal)
+    NormalVertex NormalDisk::CreateVertex (double theta, double rho, const vec3 & normal)
     {
-      dvec3 p = rho * vec (std::sin (theta), std::cos (theta), 0.0);
+      vec3 p = rho * vec (std::sin (theta), std::cos (theta), 0.0);
       return NormalVertex (p, normal);
     }
 
@@ -147,7 +147,7 @@ namespace Aa
     {
       double sin_theta = std::sin (theta);
       double cos_theta = std::cos (theta);
-      dvec3 p = vec (sin_theta, cos_theta, h);
+      vec3 p = vec (sin_theta, cos_theta, h);
       return BasicVertex (p);
     }
 
@@ -161,8 +161,8 @@ namespace Aa
     {
       double sin_theta = std::sin (theta);
       double cos_theta = std::cos (theta);
-      dvec3 p = vec (sin_theta, cos_theta, h);
-      dvec3 n = vec (sin_theta, cos_theta, 0.0);
+      vec3 p = vec (sin_theta, cos_theta, h);
+      vec3 n = vec (sin_theta, cos_theta, 0.0);
       return NormalVertex (p, n);
     }
 
@@ -238,7 +238,7 @@ namespace Aa
     {
       double sin_theta = std::sin (theta), sin_phi = std::sin (phi);
       double cos_theta = std::cos (theta), cos_phi = std::cos (phi);
-      dvec3 n = vec (sin_theta * cos_phi, sin_theta * sin_phi, cos_theta);
+      vec3 n = vec (sin_theta * cos_phi, sin_theta * sin_phi, cos_theta);
       return BasicVertex (n);
     }
 
@@ -252,7 +252,7 @@ namespace Aa
     {
       double sin_theta = std::sin (theta), sin_phi = std::sin (phi);
       double cos_theta = std::cos (theta), cos_phi = std::cos (phi);
-      dvec3 n = vec (sin_theta * cos_phi, sin_theta * sin_phi, cos_theta);
+      vec3 n = vec (sin_theta * cos_phi, sin_theta * sin_phi, cos_theta);
       return NormalVertex (n, n);
     }
 
