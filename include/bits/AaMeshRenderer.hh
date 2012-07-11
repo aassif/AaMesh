@@ -23,21 +23,20 @@ namespace Aa
       protected:
         Mesh * m_mesh;
 
-      protected:
+      public:
         static inline
-        void SetPointers (GLuint id, const Vertex * p);
+        void SetPointers (const Vertex * p);
 
         static inline
         void SetPointers (const std::vector<Vertex> & v)
         {
           if (! v.empty ())
-            SetPointers (0, &(v[0]));
+            SetPointers (&(v[0]));
         }
 
         static inline
-        void DrawElements (GLuint id, GLuint * p, GLuint count)
+        void DrawElements (GLuint * p, GLuint count)
         {
-          glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, id);
           glDrawElements (GL_TRIANGLES, count, GL_UNSIGNED_INT, p);
         }
 
@@ -54,9 +53,12 @@ namespace Aa
               indices [3*i+2] = t[i].indices[2];
             }
 
-            DrawElements (0, &(indices[0]), indices.size ());
+            DrawElements (&(indices[0]), indices.size ());
           }
         }
+
+        static inline
+        void Disable ();
 
       public:
         inline
@@ -70,10 +72,9 @@ namespace Aa
         {
           if (m_mesh != NULL)
           {
-            SetPointers  (m_mesh->vertices ());
+            SetPointers  (m_mesh->vertices  ());
             DrawElements (m_mesh->triangles ());
-            glBindBuffer (GL_ARRAY_BUFFER, 0);
-            glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
+            Disable ();
           }
         }
     };
@@ -86,11 +87,17 @@ namespace Aa
 
     template <>
     inline
-    void BasicMeshRenderer::SetPointers (GLuint id, const BasicVertex * p)
+    void BasicMeshRenderer::SetPointers (const BasicVertex * p)
     {
-      glBindBuffer (GL_ARRAY_BUFFER, id);
       glEnableClientState (GL_VERTEX_ARRAY);
       glVertexPointer (3, GL_FLOAT, sizeof (BasicVertex), &(p->coords));
+    }
+
+    template <>
+    inline
+    void BasicMeshRenderer::Disable ()
+    {
+      glDisableClientState (GL_VERTEX_ARRAY);
     }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,15 +108,21 @@ namespace Aa
 
     template <>
     inline
-    void NormalMeshRenderer::SetPointers (GLuint id, const NormalVertex * p)
+    void NormalMeshRenderer::SetPointers (const NormalVertex * p)
     {
-      glBindBuffer (GL_ARRAY_BUFFER, id);
-
       glEnableClientState (GL_VERTEX_ARRAY);
       glVertexPointer (3, GL_FLOAT, sizeof (NormalVertex), &(p->coords));
 
       glEnableClientState (GL_NORMAL_ARRAY);
       glNormalPointer    (GL_FLOAT, sizeof (NormalVertex), &(p->normal));
+    }
+
+    template <>
+    inline
+    void NormalMeshRenderer::Disable ()
+    {
+      glDisableClientState (GL_VERTEX_ARRAY);
+      glDisableClientState (GL_NORMAL_ARRAY);
     }
 
   } // namespace Mesh

@@ -28,7 +28,7 @@ namespace Aa
           const vec3 normal = vec (0.0, 0.0, up ? +1.0 : -1.0);
 
           typedef std::vector<AaUInt> Ring;
-          std::vector<Ring> rings (nRings + 1);
+          std::vector<Ring> rings (nRings + 2);
 
           rings [0].push_back (m->addVertex (CreateVertex (0.0, 0.0, normal)));
 

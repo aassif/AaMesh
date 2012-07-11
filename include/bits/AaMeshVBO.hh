@@ -28,7 +28,7 @@ namespace Aa
         static inline
         VBO * Array (const std::vector<T> & v, GLenum usage = GL_STATIC_DRAW)
         {
-          return v.empty () ? NULL : VBO::Array (&(v[0]), v.size (), usage);
+          return VBO::Array (v.empty () ? NULL : &(v[0]), v.size (), usage);
         }
 
         template <typename T>
@@ -42,7 +42,7 @@ namespace Aa
         static inline
         VBO * ElementArray (const std::vector<T> & v, GLenum usage = GL_STATIC_DRAW)
         {
-          return v.empty () ? NULL : VBO::ElementArray (&(v[0]), v.size (), usage);
+          return VBO::ElementArray (v.empty () ? NULL : &(v[0]), v.size (), usage);
         }
 
       private:
@@ -77,8 +77,7 @@ namespace Aa
 ////////////////////////////////////////////////////////////////////////////////
 
     template <class M>
-    class TMeshVBO :
-      public TMeshRenderer<M>
+    class TMeshVBO
     {
       public:
         typedef M                    Mesh;
@@ -89,7 +88,7 @@ namespace Aa
         VBO * m_vertices;
         VBO * m_triangles;
 
-      protected:
+      public:
         static inline
         VBO * CreateVBO (const std::vector<Vertex> & v, GLenum usage = GL_STATIC_DRAW)
         {
@@ -114,21 +113,26 @@ namespace Aa
         void SetPointers (const VBO * vbo)
         {
           if (vbo != NULL)
-            TMeshRenderer<M>::SetPointers (vbo->id, NULL);
+          {
+            glBindBuffer (GL_ARRAY_BUFFER, vbo->id);
+            TMeshRenderer<M>::SetPointers (NULL);
+          }
         }
 
         static inline
         void DrawElements (const VBO * vbo)
         {
           if (vbo != NULL)
-            TMeshRenderer<M>::DrawElements (vbo->id, NULL, vbo->count);
+          {
+            glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, vbo->id);
+            TMeshRenderer<M>::DrawElements (NULL, vbo->count);
+          }
         }
 
       protected:
         inline
-        void create ()
+        void create (Mesh * m)
         {
-          Mesh * m = TMeshRenderer<M>::m_mesh;
           if (m != NULL)
           {
             m_vertices  = CreateVBO (m->vertices  ());
@@ -146,11 +150,10 @@ namespace Aa
       public:
         inline
         TMeshVBO (Mesh * m = NULL) :
-          TMeshRenderer<M> (m),
           m_vertices (NULL),
           m_triangles (NULL)
         {
-          create ();
+          create (m);
         }
 
         inline
@@ -160,32 +163,27 @@ namespace Aa
         }
 
         inline
-        void update ()
-        {
-          destroy ();
-          create  ();
-        }
-
-        inline
         virtual void draw ()
         {
-          if (TMeshRenderer<M>::m_mesh != NULL)
+          if (m_vertices != NULL)
           {
             SetPointers  (m_vertices);
             DrawElements (m_triangles);
             glBindBuffer (GL_ARRAY_BUFFER, 0);
             glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
+            TMeshRenderer<M>::Disable ();
           }
         }
 
         inline
         void draw_points ()
         {
-          if (TMeshRenderer<M>::m_mesh != NULL)
+          if (m_vertices != NULL)
           {
             SetPointers (m_vertices);
             glDrawArrays (GL_POINTS, 0, m_vertices->count);
             glBindBuffer (GL_ARRAY_BUFFER, 0);
+            TMeshRenderer<M>::Disable ();
           }
         }
     };
