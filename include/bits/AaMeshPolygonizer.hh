@@ -25,7 +25,10 @@ namespace Aa
     class TPolygonizer
     {
       public:
-        typedef GridIterator<3> Iterator;
+        typedef M                    Mesh;
+        typedef typename M::Vertex   Vertex;
+        typedef typename M::Triangle Triangle;
+        typedef GridIterator<3>      Iterator;
 
       protected:
         static const AaUInt16   EDGES [256];
@@ -35,7 +38,7 @@ namespace Aa
         const R3d::Image      * m_image;
         uvec3                   m_dims;
         float                   m_iso;
-        M                     * m_mesh;
+        Mesh                  * m_mesh;
         std::map<uvec4, AaUInt> m_vertex_index;
 
       protected:
@@ -50,7 +53,7 @@ namespace Aa
         TPolygonizer (const R3d::Image * image,
                       const uvec3      & dims,
                       float              iso,
-                      M                * mesh);
+                      Mesh             * mesh);
 
         //const uvec3 & dims () const {return m_dims;}
 
@@ -371,7 +374,7 @@ namespace Aa
     TPolygonizer<M>::TPolygonizer (const R3d::Image * image,
                                    const uvec3      & dims,
                                    float              iso,
-                                   M                * mesh) :
+                                   Mesh             * mesh) :
       m_image (image),
       m_dims  (dims),
       m_iso   (iso),
@@ -432,7 +435,7 @@ namespace Aa
           AaUInt id0 = m_vertex_index [this->id (p, TRIANGLES [key][i + 0])];
           AaUInt id1 = m_vertex_index [this->id (p, TRIANGLES [key][i + 1])];
           AaUInt id2 = m_vertex_index [this->id (p, TRIANGLES [key][i + 2])];
-          m_mesh->addTriangle (typename M::Triangle (vec (id2, id1, id0)));
+          m_mesh->addTriangle (Triangle (vec (id2, id1, id0)));
         }
       }
     }
@@ -485,7 +488,7 @@ namespace Aa
         uvec3 p1 = p + OFFSETS [edge][0];
         uvec3 p2 = p + OFFSETS [edge][1];
         vec3 vertex = interpolate (p1, this->eval (p1), p2, this->eval (p2));
-        AaUInt index = m_mesh->addVertex (typename M::Vertex (vertex));
+        AaUInt index = m_mesh->addVertex (Vertex (vertex));
         m_vertex_index.insert (std::make_pair (id, index));
       }
     }
