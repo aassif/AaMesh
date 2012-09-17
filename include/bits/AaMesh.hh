@@ -97,11 +97,11 @@ namespace Aa
     class BasicTriangle
     {
       public:
-        ivec3 indices;
+        uvec3 indices;
 
       public:
         inline
-        BasicTriangle (const ivec3 & v) :
+        BasicTriangle (const uvec3 & v) :
           indices (v)
         {
         }
@@ -120,7 +120,7 @@ namespace Aa
 
       public:
         inline
-        NormalVertex (const vec3 & p, const vec3 & n) :
+        NormalVertex (const vec3 & p, const vec3 & n = vec3 ()) :
           BasicVertex (p),
           normal (n)
         {
