@@ -10,7 +10,7 @@
 #include <map>
 #include <AaGridIterator>
 //#include <AaMesh>
-#include <R3dImage.h>
+//#include <R3dImage.h>
 
 namespace Aa
 {
@@ -18,13 +18,14 @@ namespace Aa
   {
 
 ////////////////////////////////////////////////////////////////////////////////
-// Aa::Mesh::TPolygonizer<M> ///////////////////////////////////////////////////
+// Aa::Mesh::TPolygonizer<I, M> ////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-    template <class M>
+    template <class I, class M>
     class TPolygonizer
     {
       public:
+        typedef I                    Image;
         typedef M                    Mesh;
         typedef typename M::Vertex   Vertex;
         typedef typename M::Triangle Triangle;
@@ -35,25 +36,25 @@ namespace Aa
         static const AaInt8 TRIANGLES [256][16];
 
       protected:
-        const R3d::Image      * m_image;
+        const Image           * m_image;
         uvec3                   m_dims;
         float                   m_iso;
         Mesh                  * m_mesh;
+        mat4                    m_transform;
         std::map<uvec4, AaUInt> m_vertex_index;
 
       protected:
         double eval (const uvec3 &) const;
         uvec4 id (const uvec3 &, AaUInt edge) const;
         void compute (const uvec3 &, AaUInt edge);
-        vec3 compute_aux (const uvec3 &, AaUInt edge) const;
-        vec3 interpolate (const uvec3 & p1, double v1,
-                          const uvec3 & p2, double v2) const;
+        vec3 compute (const uvec3 & p1, const uvec3 & p2) const;
 
       public:
-        TPolygonizer (const R3d::Image * image,
-                      const uvec3      & dims,
-                      float              iso,
-                      Mesh             * mesh);
+        TPolygonizer (const Image * image,
+                      const uvec3 & dims,
+                      float         iso,
+                      Mesh        * mesh,
+                      mat4        = mat4 ());
 
         //const uvec3 & dims () const {return m_dims;}
 
@@ -68,11 +69,11 @@ namespace Aa
     };
 
 ////////////////////////////////////////////////////////////////////////////////
-// Aa::Mesh::TPolygonizer<M> ///////////////////////////////////////////////////
+// Aa::Mesh::TPolygonizer<I, M> ////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-    template <class M>
-    const AaUInt16 TPolygonizer<M>::EDGES [256] =
+    template <class I, class M>
+    const AaUInt16 TPolygonizer<I, M>::EDGES [256] =
     {
       0x000, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
       0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
@@ -108,8 +109,8 @@ namespace Aa
       0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x000
     };
 
-    template <class M>
-    const AaInt8 TPolygonizer<M>::TRIANGLES [256][16] =
+    template <class I, class M>
+    const AaInt8 TPolygonizer<I, M>::TRIANGLES [256][16] =
     {
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       { 0,  8,  3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
@@ -369,44 +370,46 @@ namespace Aa
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
     };
 
-    template <class M>
+    template <class I, class M>
     inline
-    TPolygonizer<M>::TPolygonizer (const R3d::Image * image,
-                                   const uvec3      & dims,
-                                   float              iso,
-                                   Mesh             * mesh) :
-      m_image (image),
-      m_dims  (dims),
-      m_iso   (iso),
-      m_mesh  (mesh)
+    TPolygonizer<I, M>::TPolygonizer (const Image * image,
+                                      const uvec3 & dims,
+                                      float         iso,
+                                      Mesh        * mesh,
+                                      mat4          transform) :
+      m_image     (image),
+      m_dims      (dims),
+      m_iso       (iso),
+      m_mesh      (mesh),
+      m_transform (transform)
     {
     }
 
-    template <class M>
+    template <class I, class M>
     inline
-    double TPolygonizer<M>::eval (const uvec3 & p) const
+    double TPolygonizer<I, M>::eval (const uvec3 & p) const
     {
       return m_image->eval ((p - 0.5) / m_dims);
     }
 
-    template <class M>
+    template <class I, class M>
     inline
-    void TPolygonizer<M>::compute (Iterator first, Iterator last)
+    void TPolygonizer<I, M>::compute (Iterator first, Iterator last)
     {
       while (first != last)
         this->compute (*(first++));
     }
 
-    template <class M>
+    template <class I, class M>
     inline
-    void TPolygonizer<M>::compute ()
+    void TPolygonizer<I, M>::compute ()
     {
       this->compute (this->begin (), this->end ());
     }
 
-    template <class M>
+    template <class I, class M>
     inline
-    void TPolygonizer<M>::compute (const uvec3 & p)
+    void TPolygonizer<I, M>::compute (const uvec3 & p)
     {
       static const uvec3 OFFSETS [] =
       {
@@ -428,7 +431,7 @@ namespace Aa
       if (EDGES [key] != 0x00)
       {
         for (AaUInt i = 0; i < 12; ++i)
-          if (EDGES [key] & (1u << i)) compute (p, i);
+          if (EDGES [key] & (1u << i)) this->compute (p, i);
 
         for (AaUInt8 i = 0; TRIANGLES [key][i] != -1; i += 3)
         {
@@ -440,9 +443,9 @@ namespace Aa
       }
     }
 
-    template <class M>
+    template <class I, class M>
     inline
-    uvec4 TPolygonizer<M>::id (const uvec3 & p, AaUInt edge) const
+    uvec4 TPolygonizer<I, M>::id (const uvec3 & p, AaUInt edge) const
     {
       switch (edge)
       {
@@ -462,9 +465,9 @@ namespace Aa
       }
     }
 
-    template <class M>
+    template <class I, class M>
     inline
-    void TPolygonizer<M>::compute (const uvec3 & p, AaUInt edge)
+    void TPolygonizer<I, M>::compute (const uvec3 & p, AaUInt edge)
     {
       static const uvec3 OFFSETS [12][2] =
       {
@@ -487,21 +490,21 @@ namespace Aa
       {
         uvec3 p1 = p + OFFSETS [edge][0];
         uvec3 p2 = p + OFFSETS [edge][1];
-        vec3 vertex = interpolate (p1, this->eval (p1), p2, this->eval (p2));
+        vec3 vertex = this->compute (p1, p2);
         AaUInt index = m_mesh->addVertex (Vertex (vertex));
         m_vertex_index.insert (std::make_pair (id, index));
       }
     }
 
-    template <class M>
+    template <class I, class M>
     inline
-    vec3 TPolygonizer<M>::interpolate (const uvec3 & p1, double v1,
-                                       const uvec3 & p2, double v2) const
+    vec3 TPolygonizer<I, M>::compute (const uvec3 & p1, const uvec3 & p2) const
     {
-      const dbox3 & box = m_image->box ();
+      float v1 = this->eval (p1);
+      float v2 = this->eval (p2);
       float w = (v1 != v2) ? (m_iso - v1) / (v2 - v1) : 0.5f;
       vec3 p = (1.0 - w) * p1 + w * p2;
-      return box.pos () + ((p - 1.0) / m_dims) * box.dim ();
+      return m_transform * vec4 ((p - 1.0) / m_dims, 1.0f);
     }
 
   } // namespace Mesh
