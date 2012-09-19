@@ -51,8 +51,8 @@ namespace Aa
 
       public:
         TPolygonizer (const Image * image,
-                      const uvec3 & dims,
                       float         iso,
+                      const uvec3 & dims,
                       Mesh        * mesh,
                       mat4        = mat4 ());
 
@@ -373,8 +373,8 @@ namespace Aa
     template <class I, class M>
     inline
     TPolygonizer<I, M>::TPolygonizer (const Image * image,
-                                      const uvec3 & dims,
                                       float         iso,
+                                      const uvec3 & dims,
                                       Mesh        * mesh,
                                       mat4          transform) :
       m_image     (image),
