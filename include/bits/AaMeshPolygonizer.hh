@@ -8,6 +8,7 @@
 // Email: rc99@doc.ic.ac.uk, rchandrashekara@hotmail.com
 
 #include <map>
+#include <AaMatrix>
 #include <AaGridIterator>
 //#include <AaMesh>
 //#include <R3dImage.h>
