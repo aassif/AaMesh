@@ -114,7 +114,7 @@ namespace Aa
 
           for (AaUInt i = 0; i <= nStacks + 1; ++i)
           {
-            double h = (2.0 * i) / (nStacks + 1) - 1.0;
+            double h = i / (nStacks + 1);
             stacks [i].resize (nSlices + 1);
 
             for (AaUInt j = 0; j <= nSlices; ++j)
