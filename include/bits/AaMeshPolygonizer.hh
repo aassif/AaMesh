@@ -45,7 +45,7 @@ namespace Aa
         std::map<uvec4, AaUInt> m_vertex_index;
 
       protected:
-        double eval (const uvec3 &) const;
+        float eval (const uvec3 &) const;
         uvec4 id (const uvec3 &, AaUInt edge) const;
         void compute (const uvec3 &, AaUInt edge);
         vec3 compute (const uvec3 & p1, const uvec3 & p2) const;
@@ -388,9 +388,9 @@ namespace Aa
 
     template <class I, class M>
     inline
-    double TPolygonizer<I, M>::eval (const uvec3 & p) const
+    float TPolygonizer<I, M>::eval (const uvec3 & p) const
     {
-      return m_image->eval ((p - 0.5) / m_dims);
+      return m_image->operator() ((p - 0.5f) / m_dims);
     }
 
     template <class I, class M>
