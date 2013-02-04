@@ -390,7 +390,6 @@ namespace Aa
     inline
     float TPolygonizer<I, M>::eval (const uvec3 & p) const
     {
-      //return m_image->operator() ((p - 0.5f) / m_dims);
       return (*m_image) [p];
     }
 
@@ -506,7 +505,7 @@ namespace Aa
       float v2 = this->eval (p2);
       float w = (v1 != v2) ? (m_iso - v1) / (v2 - v1) : 0.5f;
       vec3 p = (1.0 - w) * p1 + w * p2;
-      return m_transform * vec4 ((p - 1.0) / m_dims, 1.0f);
+      return m_transform * vec4 (p / m_dims, 1.0f);
     }
 
   } // namespace Mesh
