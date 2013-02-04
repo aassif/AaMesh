@@ -89,15 +89,24 @@ namespace Aa
     inline
     void BasicMeshRenderer::SetPointers (const BasicVertex * p)
     {
+#if 0
       glEnableClientState (GL_VERTEX_ARRAY);
       glVertexPointer (3, GL_FLOAT, sizeof (BasicVertex), &(p->coords));
+#else
+      glEnableVertexAttribArray (0);
+      glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, sizeof (BasicVertex), &(p->coords));
+#endif
     }
 
     template <>
     inline
     void BasicMeshRenderer::Disable ()
     {
+#if 0
       glDisableClientState (GL_VERTEX_ARRAY);
+#else
+      glDisableVertexAttribArray (0);
+#endif
     }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -110,19 +119,32 @@ namespace Aa
     inline
     void NormalMeshRenderer::SetPointers (const NormalVertex * p)
     {
+#if 0
       glEnableClientState (GL_VERTEX_ARRAY);
       glVertexPointer (3, GL_FLOAT, sizeof (NormalVertex), &(p->coords));
 
       glEnableClientState (GL_NORMAL_ARRAY);
       glNormalPointer    (GL_FLOAT, sizeof (NormalVertex), &(p->normal));
+#else
+      glEnableVertexAttribArray (0);
+      glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, sizeof (NormalVertex), &(p->coords));
+
+      glEnableVertexAttribArray (1);
+      glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, sizeof (NormalVertex), &(p->normal));
+#endif
     }
 
     template <>
     inline
     void NormalMeshRenderer::Disable ()
     {
+#if 0
       glDisableClientState (GL_VERTEX_ARRAY);
       glDisableClientState (GL_NORMAL_ARRAY);
+#else
+      glDisableVertexAttribArray (0);
+      glDisableVertexAttribArray (1);
+#endif
     }
 
   } // namespace Mesh
