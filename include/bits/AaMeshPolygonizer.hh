@@ -59,8 +59,8 @@ namespace Aa
 
         //const uvec3 & dims () const {return m_dims;}
 
-        Iterator begin () const {return Iterator (m_dims + 2, uvec3 ());}
-        Iterator end   () const {return Iterator (m_dims + 2);}
+        Iterator begin () const {return Iterator (m_dims - 1, uvec3 ());}
+        Iterator end   () const {return Iterator (m_dims - 1);}
 
         //unsigned int count () const {return (m_dims + 2).prod ();}
 
@@ -390,7 +390,8 @@ namespace Aa
     inline
     float TPolygonizer<I, M>::eval (const uvec3 & p) const
     {
-      return m_image->operator() ((p - 0.5f) / m_dims);
+      //return m_image->operator() ((p - 0.5f) / m_dims);
+      return (*m_image) [p];
     }
 
     template <class I, class M>
