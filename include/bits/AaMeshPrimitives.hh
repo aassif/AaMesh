@@ -5,7 +5,129 @@ namespace Aa
 {
   namespace Mesh
   {
-    /** TDisk<M> */
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TDisk<M> //////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    template <class M>
+    class TQuad
+    {
+      public:
+        typedef M Mesh;
+        typedef typename Mesh::Vertex   Vertex;
+        typedef typename Mesh::Triangle Triangle;
+
+      private:
+        inline static
+        Vertex CreateVertex (double x, double y, const vec3 & normal);
+
+      public:
+        inline static
+        M * Create ()
+        {
+          M * m = new M;
+          static const vec3 NORMAL = vec<float> (0, 0, 1);
+          m->addVertex (CreateVertex (-1, -1, NORMAL));
+          m->addVertex (CreateVertex (-1, +1, NORMAL));
+          m->addVertex (CreateVertex (+1, -1, NORMAL));
+          m->addVertex (CreateVertex (+1, +1, NORMAL));
+          m->addTriangle (Triangle (0, 1, 2));
+          m->addTriangle (Triangle (1, 3, 2));
+          return m;
+        }
+    };
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TCube<M> //////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    template <class M>
+    class TCube
+    {
+      public:
+        typedef M Mesh;
+        typedef typename Mesh::Vertex   Vertex;
+        typedef typename Mesh::Triangle Triangle;
+
+        enum
+        {
+          LEFT   = 0,
+          RIGHT  = 1,
+          BOTTOM = 2,
+          TOP    = 3,
+          BACK   = 4,
+          FRONT  = 5
+        };
+
+      private:
+        inline static
+        Vertex CreateVertex (const vec3 & p, const vec3 & normal);
+
+      public:
+        inline static
+        M * Create ()
+        {
+          static const vec3 POSITIONS [8] =
+          {
+            vec<float> (0, 0, 0),
+            vec<float> (1, 0, 0),
+            vec<float> (0, 1, 0),
+            vec<float> (1, 1, 0),
+            vec<float> (0, 0, 1),
+            vec<float> (1, 0, 1),
+            vec<float> (0, 1, 1),
+            vec<float> (1, 1, 1)
+          };
+
+          static const vec3 NORMALS [6] =
+          {
+            vec<float> ( 0,  0, -1),
+            vec<float> ( 0,  0, +1),
+            vec<float> ( 0, -1,  0),
+            vec<float> ( 0, +1,  0),
+            vec<float> (-1,  0,  0),
+            vec<float> (+1,  0,  0)
+          };
+
+          static const AaUInt FACES [6][4] = 
+          {
+            {0, 4, 6, 2},
+            {5, 1, 3, 7},
+            {0, 1, 5, 4},
+            {6, 7, 3, 2},
+            {0, 2, 3, 1},
+            {4, 5, 7, 6},
+          };
+
+          M * m = new M;
+          for (AaUInt i = 0; i < 6; ++i)
+          {
+            AaUInt v0 = m->addVertex (CreateVertex (POSITIONS[FACES[i][0]], NORMALS[i]));
+            AaUInt v1 = m->addVertex (CreateVertex (POSITIONS[FACES[i][1]], NORMALS[i]));
+            AaUInt v2 = m->addVertex (CreateVertex (POSITIONS[FACES[i][2]], NORMALS[i]));
+            AaUInt v3 = m->addVertex (CreateVertex (POSITIONS[FACES[i][3]], NORMALS[i]));
+            m->addTriangle (vec (v0, v1, v2));
+            m->addTriangle (vec (v0, v2, v3));
+          }
+          return m;
+        }
+    };
+
+    /** BasicCube */
+
+    typedef TCube<BasicMesh> BasicCube;
+
+    template <>
+    inline
+    BasicVertex BasicCube::CreateVertex (const vec3 & p, const vec3 &)
+    {
+      return BasicVertex (p);
+    }
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TDisk<M> //////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
     template <class M>
     class TDisk
@@ -89,7 +211,9 @@ namespace Aa
       return NormalVertex (p, normal);
     }
 
-    /** TCylinder<M> */
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TCylinder<M> //////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
     template <class M>
     class TCylinder
@@ -166,7 +290,9 @@ namespace Aa
       return NormalVertex (p, n);
     }
 
-    /** TSphere<M> */
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TSphere<M> ////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
     template <class M>
     class TSphere
@@ -256,7 +382,9 @@ namespace Aa
       return NormalVertex (n, n);
     }
 
-    /** TTorus<M> */
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TTorus<M> /////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
   } // namespace Mesh
 } // namespace Aa
