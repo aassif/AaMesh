@@ -39,20 +39,17 @@ namespace Aa
       protected:
         const Image           * m_image;
         uvec3                   m_dims;
-        float                   m_iso;
         Mesh                  * m_mesh;
         mat4                    m_transform;
         std::map<uvec4, AaUInt> m_vertex_index;
 
       protected:
-        float eval (const uvec3 &) const;
         uvec4 id (const uvec3 &, AaUInt edge) const;
         void compute (const uvec3 &, AaUInt edge);
         vec3 compute (const uvec3 & p1, const uvec3 & p2) const;
 
       public:
         TPolygonizer (const Image * image,
-                      float         iso,
                       const uvec3 & dims,
                       Mesh        * mesh,
                       mat4        = mat4 ());
@@ -374,23 +371,14 @@ namespace Aa
     template <class I, class M>
     inline
     TPolygonizer<I, M>::TPolygonizer (const Image * image,
-                                      float         iso,
                                       const uvec3 & dims,
                                       Mesh        * mesh,
                                       mat4          transform) :
       m_image     (image),
       m_dims      (dims),
-      m_iso       (iso),
       m_mesh      (mesh),
       m_transform (transform)
     {
-    }
-
-    template <class I, class M>
-    inline
-    float TPolygonizer<I, M>::eval (const uvec3 & p) const
-    {
-      return (*m_image) [p];
     }
 
     template <class I, class M>
@@ -426,7 +414,7 @@ namespace Aa
 
       AaUInt8 key = 0x00;
       for (AaUInt i = 0; i < 8; ++i)
-        if (this->eval (p + OFFSETS[i]) < m_iso)
+        if ((*m_image) [p + OFFSETS[i]] < 0)
           key |= (1u << i);
 
       if (EDGES [key] != 0x00)
@@ -501,12 +489,55 @@ namespace Aa
     inline
     vec3 TPolygonizer<I, M>::compute (const uvec3 & p1, const uvec3 & p2) const
     {
-      float v1 = this->eval (p1);
-      float v2 = this->eval (p2);
-      float w = (v1 != v2) ? (m_iso - v1) / (v2 - v1) : 0.5f;
+      float v1 = (*m_image) [p1];
+      float v2 = (*m_image) [p2];
+      float w = (v1 != v2) ? (0 - v1) / (v2 - v1) : 0.5f;
       vec3 p = (1.0 - w) * p1 + w * p2;
       return m_transform * vec4 (p / m_dims, 1.0f);
     }
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TPolygonizerImage<I> //////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    template <class Image>
+    class TPolygonizerImage
+    {
+      private:
+        const Image * m_image;
+
+      public:
+        TPolygonizerImage (const Image * image) :
+          m_image (image)
+        {
+        }
+
+        float operator[] (const uvec3 &) const;
+    };
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TPolygonizerImageOffset<I> ////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    template <class Image>
+    class TPolygonizerImageOffset :
+      public TPolygonizerImage<Image>
+    {
+      private:
+        float m_offset;
+
+      public:
+        TPolygonizerImageOffset (const Image * image, float offset) :
+          TPolygonizerImage<Image> (image),
+          m_offset (offset)
+        {
+        }
+
+        float operator[] (const uvec3 & p) const
+        {
+          return this->TPolygonizerImage<Image>::operator[] (p) - m_offset;
+        }
+    };
 
   } // namespace Mesh
 } // namespace Aa

@@ -103,10 +103,11 @@ namespace Aa
           M * m = new M;
           for (AaUInt i = 0; i < 6; ++i)
           {
-            AaUInt v0 = m->addVertex (CreateVertex (POSITIONS[FACES[i][0]], NORMALS[i]));
-            AaUInt v1 = m->addVertex (CreateVertex (POSITIONS[FACES[i][1]], NORMALS[i]));
-            AaUInt v2 = m->addVertex (CreateVertex (POSITIONS[FACES[i][2]], NORMALS[i]));
-            AaUInt v3 = m->addVertex (CreateVertex (POSITIONS[FACES[i][3]], NORMALS[i]));
+            const vec3 & n = NORMALS [i];
+            AaUInt v0 = m->addVertex (CreateVertex (POSITIONS[FACES[i][0]], n));
+            AaUInt v1 = m->addVertex (CreateVertex (POSITIONS[FACES[i][1]], n));
+            AaUInt v2 = m->addVertex (CreateVertex (POSITIONS[FACES[i][2]], n));
+            AaUInt v3 = m->addVertex (CreateVertex (POSITIONS[FACES[i][3]], n));
             m->addTriangle (vec (v0, v1, v2));
             m->addTriangle (vec (v0, v2, v3));
           }
