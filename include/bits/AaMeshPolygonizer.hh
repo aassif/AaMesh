@@ -56,8 +56,8 @@ namespace Aa
 
         //const uvec3 & dims () const {return m_dims;}
 
-        Iterator begin () const {return Iterator (m_dims - 1, uvec3 ());}
-        Iterator end   () const {return Iterator (m_dims - 1);}
+        Iterator begin () const {return Iterator::Begin (m_dims - 1);}
+        Iterator end   () const {return Iterator::End   (m_dims - 1);}
 
         //unsigned int count () const {return (m_dims + 2).prod ();}
 
