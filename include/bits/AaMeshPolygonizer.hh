@@ -484,7 +484,7 @@ namespace Aa
       float v1 = (*m_image) [p1];
       float v2 = (*m_image) [p2];
       float w = (v1 != v2) ? (0 - v1) / (v2 - v1) : 0.5f;
-      vec3 p = (1.0 - w) * p1 + w * p2;
+      vec3 p = (1.0f - w) * p1 + w * p2;
       return m_transform * vec4 (p / m_image->dims (), 1.0f);
     }
 
