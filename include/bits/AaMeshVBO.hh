@@ -163,7 +163,7 @@ namespace Aa
         }
 
         inline
-        virtual void draw ()
+        virtual void draw () const
         {
           if (m_vertices != NULL)
           {
@@ -176,7 +176,7 @@ namespace Aa
         }
 
         inline
-        void draw_points ()
+        void draw_points () const
         {
           if (m_vertices != NULL)
           {
