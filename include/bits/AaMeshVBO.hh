@@ -131,7 +131,7 @@ namespace Aa
 
       protected:
         inline
-        void create (Mesh * m)
+        void create (const Mesh * m)
         {
           if (m != NULL)
           {
@@ -149,7 +149,7 @@ namespace Aa
 
       public:
         inline
-        TMeshVBO (Mesh * m = NULL) :
+        TMeshVBO (const Mesh * m = NULL) :
           m_vertices (NULL),
           m_triangles (NULL)
         {

@@ -1,3 +1,4 @@
+#include <AaBox>
 #include <AaMesh>
 
 namespace Aa
@@ -9,7 +10,7 @@ namespace Aa
     static box3 box (InputIterator first, InputIterator last)
     {
       BoxHelper3f h;
-      for (InputIterator i = first; i != end; ++i)
+      for (InputIterator i = first; i != last; ++i)
         h.feed (i->coords);
       return h.get ();
     }
@@ -17,7 +18,7 @@ namespace Aa
     template <class M>
     static box3 box (const M * mesh)
     {
-      const std::vector<M::Vertex> & v = mesh->vertices ();
+      const std::vector<typename M::Vertex> & v = mesh->vertices ();
       return Mesh::box (v.begin (), v.end ());
     }
 
