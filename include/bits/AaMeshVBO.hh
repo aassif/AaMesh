@@ -163,7 +163,7 @@ namespace Aa
         }
 
         inline
-        virtual void draw () const
+        void draw () const
         {
           if (m_vertices != NULL)
           {
