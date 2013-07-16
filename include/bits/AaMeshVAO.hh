@@ -72,6 +72,9 @@ namespace Aa
           destroy ();
         }
 
+        inline VBO * vertices  () {return m_vertices;}
+        inline VBO * triangles () {return m_triangles;}
+
         inline
         void bind () const
         {
