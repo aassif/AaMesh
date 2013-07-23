@@ -14,9 +14,9 @@ namespace Aa
     class TQuad
     {
       public:
-        typedef M Mesh;
-        typedef typename Mesh::Vertex   Vertex;
-        typedef typename Mesh::Triangle Triangle;
+        typedef /******/ M         Mesh;
+        typedef typename M::Vertex Vertex;
+        typedef typename M::Face   Face;
 
       private:
         inline static
@@ -32,8 +32,8 @@ namespace Aa
           m->addVertex (CreateVertex (-1, +1, NORMAL));
           m->addVertex (CreateVertex (+1, -1, NORMAL));
           m->addVertex (CreateVertex (+1, +1, NORMAL));
-          m->addTriangle (Triangle (0, 1, 2));
-          m->addTriangle (Triangle (1, 3, 2));
+          m->addFace (Face (0, 1, 2));
+          m->addFace (Face (1, 3, 2));
           return m;
         }
     };
@@ -46,9 +46,9 @@ namespace Aa
     class TCube
     {
       public:
-        typedef M Mesh;
-        typedef typename Mesh::Vertex   Vertex;
-        typedef typename Mesh::Triangle Triangle;
+        typedef /******/ M         Mesh;
+        typedef typename M::Vertex Vertex;
+        typedef typename M::Face   Face;
 
         enum
         {
@@ -108,8 +108,8 @@ namespace Aa
             AaUInt v1 = m->addVertex (CreateVertex (POSITIONS[FACES[i][1]], n));
             AaUInt v2 = m->addVertex (CreateVertex (POSITIONS[FACES[i][2]], n));
             AaUInt v3 = m->addVertex (CreateVertex (POSITIONS[FACES[i][3]], n));
-            m->addTriangle (vec (v0, v1, v2));
-            m->addTriangle (vec (v0, v2, v3));
+            m->addFace (vec (v0, v1, v2));
+            m->addFace (vec (v0, v2, v3));
           }
           return m;
         }
@@ -134,9 +134,9 @@ namespace Aa
     class TDisk
     {
       public:
-        typedef M Mesh;
-        typedef typename Mesh::Vertex   Vertex;
-        typedef typename Mesh::Triangle Triangle;
+        typedef /******/ M         Mesh;
+        typedef typename M::Vertex Vertex;
+        typedef typename M::Face   Face;
 
       private:
         inline static
@@ -172,15 +172,15 @@ namespace Aa
 
           {
             for (AaUInt j0 = J0, j1 = J1; j0 < nSlices; ++j0, ++j1)
-              m->addTriangle (Triangle (vec (rings [0][0], rings [1][j0], rings [1][j1])));
+              m->addFace (Face (vec (rings [0][0], rings [1][j0], rings [1][j1])));
           }
 
           for (AaUInt i0 = 1, i1 = 2; i0 < nRings; ++i0, ++i1)
           {
             for (AaUInt j0 = J0, j1 = J1; j0 < nSlices; ++j0, ++j1)
             {
-              m->addTriangle (Triangle (vec (rings [i0][j0], rings [i1][j0], rings [i1][j1])));
-              m->addTriangle (Triangle (vec (rings [i0][j0], rings [i1][j1], rings [i0][j1])));
+              m->addFace (Face (vec (rings [i0][j0], rings [i1][j0], rings [i1][j1])));
+              m->addFace (Face (vec (rings [i0][j0], rings [i1][j1], rings [i0][j1])));
             }
           }
 
@@ -220,9 +220,9 @@ namespace Aa
     class TCylinder
     {
       public:
-        typedef M Mesh;
-        typedef typename Mesh::Vertex   Vertex;
-        typedef typename Mesh::Triangle Triangle;
+        typedef /******/ M         Mesh;
+        typedef typename M::Vertex Vertex;
+        typedef typename M::Face   Face;
 
       private:
         inline static
@@ -253,8 +253,8 @@ namespace Aa
           {
             for (AaUInt j0 = 0, j1 = 1; j0 < nSlices; ++j0, ++j1)
             {
-              m->addTriangle (Triangle (vec (stacks [i0][j0], stacks [i1][j0], stacks [i1][j1])));
-              m->addTriangle (Triangle (vec (stacks [i0][j0], stacks [i1][j1], stacks [i0][j1])));
+              m->addFace (Face (vec (stacks [i0][j0], stacks [i1][j0], stacks [i1][j1])));
+              m->addFace (Face (vec (stacks [i0][j0], stacks [i1][j1], stacks [i0][j1])));
             }
           }
 
@@ -299,9 +299,9 @@ namespace Aa
     class TSphere
     {
       public:
-        typedef M Mesh;
-        typedef typename Mesh::Vertex   Vertex;
-        typedef typename Mesh::Triangle Triangle;
+        typedef /******/ M         Mesh;
+        typedef typename M::Vertex Vertex;
+        typedef typename M::Face   Face;
 
       private:
         inline static
@@ -334,21 +334,21 @@ namespace Aa
 
           {
             for (AaUInt j0 = 0, j1 = 1; j0 < nSlices; ++j0, ++j1)
-              m->addTriangle (Triangle (vec (stacks [0][0], stacks [1][j0], stacks [1][j1])));
+              m->addFace (Face (vec (stacks [0][0], stacks [1][j0], stacks [1][j1])));
           }
 
           for (AaUInt i0 = 1, i1 = 2; i0 < nStacks; ++i0, ++i1)
           {
             for (AaUInt j0 = 0, j1 = 1; j0 < nSlices; ++j0, ++j1)
             {
-              m->addTriangle (Triangle (vec (stacks [i0][j0], stacks [i1][j0], stacks [i1][j1])));
-              m->addTriangle (Triangle (vec (stacks [i0][j0], stacks [i1][j1], stacks [i0][j1])));
+              m->addFace (Face (vec (stacks [i0][j0], stacks [i1][j0], stacks [i1][j1])));
+              m->addFace (Face (vec (stacks [i0][j0], stacks [i1][j1], stacks [i0][j1])));
             }
           }
 
           {
             for (AaUInt j0 = 0, j1 = 1; j0 < nSlices; ++j0, ++j1)
-              m->addTriangle (Triangle (vec (stacks [nStacks][j0], stacks [nStacks+1][0], stacks [nStacks][j1])));
+              m->addFace (Face (vec (stacks [nStacks][j0], stacks [nStacks+1][0], stacks [nStacks][j1])));
           }
 
           return m;

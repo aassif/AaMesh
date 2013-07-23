@@ -9,23 +9,18 @@ namespace Aa
   {
 
 ////////////////////////////////////////////////////////////////////////////////
-// Aa::Mesh::TMeshRenderer<M> //////////////////////////////////////////////////
+// Aa::Mesh::TVertexRenderer<V> ////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-    template <class M>
-    class TMeshRenderer
+    template <class V>
+    class TVertexRenderer
     {
       public:
-        typedef M                    Mesh;
-        typedef typename M::Vertex   Vertex;
-        typedef typename M::Triangle Triangle;
-
-      protected:
-        Mesh * m_mesh;
+        typedef V Vertex;
 
       public:
         static inline
-        void SetPointers (const Vertex * p);
+        void SetPointers (const Vertex *);
 
         static inline
         void SetPointers (const std::vector<Vertex> & v)
@@ -35,59 +30,18 @@ namespace Aa
         }
 
         static inline
-        void DrawElements (GLuint * p, GLuint count)
-        {
-          glDrawElements (GL_TRIANGLES, count, GL_UNSIGNED_INT, p);
-        }
-
-        static inline
-        void DrawElements (const std::vector<Triangle> & t)
-        {
-          if (! t.empty ())
-          {
-            std::vector<GLuint> indices (3 * t.size ());
-            for (AaUInt i = 0; i < t.size (); ++i)
-            {
-              indices [3*i+0] = t[i].indices[0];
-              indices [3*i+1] = t[i].indices[1];
-              indices [3*i+2] = t[i].indices[2];
-            }
-
-            DrawElements (&(indices[0]), indices.size ());
-          }
-        }
-
-        static inline
         void Disable ();
-
-      public:
-        inline
-        TMeshRenderer (Mesh * m = NULL) :
-          m_mesh (m)
-        {
-        }
-
-        inline
-        virtual void draw ()
-        {
-          if (m_mesh != NULL)
-          {
-            SetPointers  (m_mesh->vertices  ());
-            DrawElements (m_mesh->triangles ());
-            Disable ();
-          }
-        }
     };
 
 ////////////////////////////////////////////////////////////////////////////////
-// Aa::Mesh::BasicMeshRenderer /////////////////////////////////////////////////
+// Aa::Mesh::BasicVertexRenderer ///////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-    typedef TMeshRenderer<BasicMesh> BasicMeshRenderer;
+    typedef TVertexRenderer<BasicVertex> BasicVertexRenderer;
 
     template <>
     inline
-    void BasicMeshRenderer::SetPointers (const BasicVertex * p)
+    void BasicVertexRenderer::SetPointers (const BasicVertex * p)
     {
 #if 0
       glEnableClientState (GL_VERTEX_ARRAY);
@@ -100,7 +54,7 @@ namespace Aa
 
     template <>
     inline
-    void BasicMeshRenderer::Disable ()
+    void BasicVertexRenderer::Disable ()
     {
 #if 0
       glDisableClientState (GL_VERTEX_ARRAY);
@@ -110,14 +64,14 @@ namespace Aa
     }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Aa::Mesh::NormalMeshRenderer<M> /////////////////////////////////////////////
+// Aa::Mesh::NormalVertexRenderer //////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-    typedef TMeshRenderer<NormalMesh> NormalMeshRenderer;
+    typedef TVertexRenderer<NormalVertex> NormalVertexRenderer;
 
     template <>
     inline
-    void NormalMeshRenderer::SetPointers (const NormalVertex * p)
+    void NormalVertexRenderer::SetPointers (const NormalVertex * p)
     {
 #if 0
       glEnableClientState (GL_VERTEX_ARRAY);
@@ -136,7 +90,7 @@ namespace Aa
 
     template <>
     inline
-    void NormalMeshRenderer::Disable ()
+    void NormalVertexRenderer::Disable ()
     {
 #if 0
       glDisableClientState (GL_VERTEX_ARRAY);
@@ -146,6 +100,101 @@ namespace Aa
       glDisableVertexAttribArray (1);
 #endif
     }
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TFaceRenderer<F> //////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    template <class F>
+    class TFaceRenderer
+    {
+      public:
+        typedef F Face;
+
+      public:
+        static inline
+        void DrawElements (GLuint *, GLuint count);
+
+        static inline
+        void DrawElements (const std::vector<Face> &);
+    };
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::BasicTriangleRenderer /////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    typedef TFaceRenderer<BasicTriangle> BasicTriangleRenderer;
+
+    template <>
+    inline
+    void BasicTriangleRenderer::DrawElements (GLuint * p, GLuint count)
+    {
+      glDrawElements (GL_TRIANGLES, count, GL_UNSIGNED_INT, p);
+    }
+
+    template <>
+    inline
+    void BasicTriangleRenderer::DrawElements (const std::vector<BasicTriangle> & v)
+    {
+      if (! v.empty ())
+      {
+        std::vector<GLuint> indices (3 * v.size ());
+        for (AaUInt i = 0; i < v.size (); ++i)
+        {
+          indices [3*i + 0] = v[i].indices[0];
+          indices [3*i + 1] = v[i].indices[1];
+          indices [3*i + 2] = v[i].indices[2];
+        }
+
+        BasicTriangleRenderer::DrawElements (&(indices[0]), indices.size ());
+      }
+    }
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TMeshRenderer<M> //////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    template <class M>
+    class TMeshRenderer
+    {
+      public:
+        typedef /******/ M         Mesh;
+        typedef typename M::Vertex Vertex;
+        typedef typename M::Face   Face;
+
+      protected:
+        Mesh * m_mesh;
+
+      public:
+        inline
+        TMeshRenderer (Mesh * m = NULL) :
+          m_mesh (m)
+        {
+        }
+
+        inline
+        virtual void draw ()
+        {
+          if (m_mesh != NULL)
+          {
+            TVertexRenderer<Vertex>::SetPointers (m_mesh->vertices ());
+            TFaceRenderer<Face>::DrawElements (m_mesh->faces ());
+            TVertexRenderer<Vertex>::Disable ();
+          }
+        }
+    };
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::BasicMeshRenderer /////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    typedef TMeshRenderer<BasicMesh> BasicMeshRenderer;
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::NormalMeshRenderer<M> /////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    typedef TMeshRenderer<NormalMesh> NormalMeshRenderer;
 
   } // namespace Mesh
 } // namespace Aa

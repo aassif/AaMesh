@@ -26,11 +26,11 @@ namespace Aa
     class TPolygonizer
     {
       public:
-        typedef I                    Image;
-        typedef M                    Mesh;
-        typedef typename M::Vertex   Vertex;
-        typedef typename M::Triangle Triangle;
-        typedef GridIterator<3>      Iterator;
+        typedef I                  Image;
+        typedef M                  Mesh;
+        typedef typename M::Vertex Vertex;
+        typedef typename M::Face   Face;
+        typedef GridIterator<3>    Iterator;
 
       protected:
         static const AaUInt16   EDGES [256];
@@ -419,7 +419,7 @@ namespace Aa
           AaUInt id0 = m_vertex_index [this->id (p, TRIANGLES [key][i + 0])];
           AaUInt id1 = m_vertex_index [this->id (p, TRIANGLES [key][i + 1])];
           AaUInt id2 = m_vertex_index [this->id (p, TRIANGLES [key][i + 2])];
-          m_mesh->addTriangle (Triangle (vec (id2, id1, id0)));
+          m_mesh->addFace (Face (vec (id2, id1, id0)));
         }
       }
     }

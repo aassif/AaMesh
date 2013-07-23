@@ -10,24 +10,24 @@ namespace Aa
   {
     /** Mesh */
 
-    template <class V, class T>
+    template <class V, class F>
     class TMesh
     {
       public:
         typedef V Vertex;
-        typedef T Triangle;
+        typedef F Face;
 
       protected:
-        std::vector<Vertex>   m_v; // vertices.
-        std::vector<Triangle> m_t; // triangles.
+        std::vector<Vertex> m_v; // vertices.
+        std::vector<Face>   m_f; // faces.
 
       public:
         // Constructor.
         inline
-        TMesh (AaUInt v = 0, AaUInt t = 0)
+        TMesh (AaUInt v = 0, AaUInt f = 0)
         {
           m_v.reserve (v);
-          m_t.reserve (t);
+          m_f.reserve (f);
         }
 
         // Destructor.
@@ -41,7 +41,7 @@ namespace Aa
         virtual void clear ()
         {
           m_v.clear ();
-          m_t.clear ();
+          m_f.clear ();
         }
 
         // Vertices.
@@ -60,19 +60,19 @@ namespace Aa
           return n;
         }
 
-        // Triangles.
-        inline const std::vector<Triangle> & triangles () const {return m_t;}
-        inline /***/ std::vector<Triangle> & triangles () /***/ {return m_t;}
+        // Faces.
+        inline const std::vector<Face> & faces () const {return m_f;}
+        inline /***/ std::vector<Face> & faces () /***/ {return m_f;}
 
-        // Access to a triangle.
-        inline const Triangle & triangle (AaUInt k) const {return m_t [k];}
-        inline /***/ Triangle & triangle (AaUInt k) /***/ {return m_t [k];}
+        // Access to a face.
+        inline const Face & face (AaUInt k) const {return m_f [k];}
+        inline /***/ Face & face (AaUInt k) /***/ {return m_f [k];}
 
-        // Add a new triangle.
-        inline virtual AaUInt addTriangle (const Triangle & t)
+        // Add a new face.
+        inline virtual AaUInt addFace (const Face & f)
         {
-          AaUInt n = m_t.size ();
-          m_t.push_back (t);
+          AaUInt n = m_f.size ();
+          m_f.push_back (f);
           return n;
         }
     };

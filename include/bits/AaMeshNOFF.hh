@@ -44,7 +44,7 @@ namespace Aa
         m->addVertex (noff_read_vertex (is));
 
       for (AaUInt i = 0; i < triangles; ++i)
-        m->addTriangle (noff_read_triangle (is));
+        m->addFace (noff_read_triangle (is));
 
       return m;
     }
@@ -83,8 +83,8 @@ namespace Aa
     inline
     void noff_write (std::ostream & os, NormalMesh * m)
     {
-      const std::vector<NormalVertex>  & v = m->vertices  ();
-      const std::vector<BasicTriangle> & t = m->triangles ();
+      const std::vector<NormalVertex>  & v = m->vertices ();
+      const std::vector<BasicTriangle> & t = m->faces    ();
 
       os << "NOFF" << std::endl;
       os << v.size () << ' ' << t.size () << " 0" << std::endl;

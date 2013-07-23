@@ -1,218 +1,157 @@
-#ifndef __AASSIF_MESH_SEPARATOR__
-#define __AASSIF_MESH_SEPARATOR__
+#ifndef AA_MESH_SEPARATOR__H
+#define AA_MESH_SEPARATOR__H
 
 #include <set>
 #include <map>
 #include <list>
 
-#include <iostream>
-
-#ifdef DEBUG
-  #define ASSERT(x) assert (x)
-#else
-  #define ASSERT(x)
-#endif
-
 namespace Aa
 {
   namespace Mesh
   {
-    template <class M>
-    class MeshSeparator
+
+    class MeshConnectivity
     {
-    private:
-      typedef typename M::Vertex   Vertex;
-      typedef typename M::Triangle Triangle;
-      typedef std::set<int> VertexSet;
-      typedef std::map<int, VertexSet> AdjacencyMap;
-      typedef enum {NOT_CONNECTED, CONNECTED, DONE} State;
-      typedef std::vector<State> StateTable;
-      typedef std::map<int, int> VertexMap;
+      public:
+        typedef std::set<AaUInt> VertexSet;
+        typedef std::map<AaUInt, VertexSet> AdjacencyMap;
 
-    private:
-      const M * m_mesh;
-      AdjacencyMap m_adjVertices;
-      StateTable m_states;
-      VertexMap m_index;
-      std::vector<M *> m_result;
+        typedef enum {READY = 0, CONNECTED = 1, DONE = 2} State;
 
-      // Start point look-up.
-      int findStart () const
-      {
-        // Look for the 1st not connected vertex.
-        for (unsigned int i = 0; i < m_states.size (); ++i)
+      protected:
+        AdjacencyMap       m_adjacency;
+        std::vector<State> m_states;
+
+      protected:
+        template <class Face>
+        inline
+        void init (const Face &);
+
+      public:
+        template <class M>
+        inline
+        MeshConnectivity (const M * m) :
+          m_adjacency (),
+          m_states (m->vertices().size(), READY)
         {
-          //std::cout << m_states [i] << std::endl;
-          if (m_states [i] == NOT_CONNECTED) return i;
+          for (AaUInt i = 0; i < m->faces().size(); ++i)
+            this->init (m->face (i));
         }
-        // If there is no such vertex, return -1.
-        return -1;
-      }
 
-      // Connectivity detection.
-      void setConnectivity (int x)
-      {
-#if 0
-        m_states [x] = CONNECTED;
-
-        const VertexSet &
-          neighbourhood = m_adjVertices [x];
-
-        for (VertexSet::const_iterator
-               i = neighbourhood.begin (),
-               e = neighbourhood.end   (); i != e;)
+        inline
+        void flood (AaUInt k1)
         {
-          int neighbour = *(i++);
-          if (m_states [neighbour] == NOT_CONNECTED)
+          std::vector<AaUInt> q;
+          q.reserve (m_states.size ());
+
+          m_states [k1] = CONNECTED;
+          q.push_back (k1);
+
+          for (AaUInt j = 0; j < q.size (); ++j)
           {
-            //m_states [neighbour] = CONNECTED;
-            this->setConnectivity (neighbour);
-          }
-        }
-#else
-        std::vector<int> q;
-        q.reserve (m_states.size ());
-
-        m_states [x] = CONNECTED;
-        q.push_back (x);
-
-        for (unsigned int i = 0; i < q.size (); ++i)
-        {
-          const VertexSet &
-            neighbourhood = m_adjVertices [q[i]];
-
-          for (VertexSet::const_iterator
-                 i = neighbourhood.begin (),
-                 e = neighbourhood.end   (); i != e;)
-          {
-            int neighbour = *(i++);
-            if (m_states [neighbour] == NOT_CONNECTED)
+            const VertexSet & v = m_adjacency [q[j]];
+            for (VertexSet::const_iterator i = v.begin (), e = v.end (); i != e;)
             {
-              m_states [neighbour] = CONNECTED;
-              q.push_back (neighbour);
+              AaUInt k2 = *(i++);
+              if (m_states [k2] == READY)
+              {
+                m_states [k2] = CONNECTED;
+                q.push_back (k2);
+              }
             }
           }
         }
-#endif
-      }
 
-      // Registration of a vertex.
-      int registerVertex (M * m, int src)
-      {
-        VertexMap::iterator found = m_index.find (src);
-        if (found == m_index.end ())
+        inline
+        bool vertex_ready (AaUInt k) const
         {
-          int idx = m->addVertex (m_mesh->vertex (src));
-          found = m_index.insert (m_index.end (), VertexMap::value_type (src, idx));
+          return (m_states [k] == READY);
         }
-        return found->second;
-      }
 
-      // Registration of a triangle.
-      void registerTriangle (M * m, int a, int b, int c)
-      {
-        int ma = this->registerVertex (m, a);
-        int mb = this->registerVertex (m, b);
-        int mc = this->registerVertex (m, c);
-        m->addTriangle (typename M::Triangle (vec (ma, mb, mc)));
-      }
+        template <class F>
+        inline
+        bool face_connected (const F &) const;
 
-      // Connected component separation.
-      void finishComponent ()
-      {
-        M * m = new M ();
-        m_index.clear ();
-
-        const std::vector<Vertex>   & vertices  = m_mesh->vertices ();
-        const std::vector<Triangle> & triangles = m_mesh->triangles ();
-
-        for (typename std::vector<Triangle>::const_iterator
-               i = triangles.begin (), e = triangles.end (); i != e; ++i)
+        inline
+        void finish ()
         {
-          int
-            a = i->indices [0],
-            b = i->indices [1],
-            c = i->indices [2];
+          for (AaUInt i = 0; i < m_states.size (); ++i)
+            if (m_states [i] == CONNECTED)
+              m_states [i] = DONE;
+        }
+    };
 
-          if (m_states [a] == CONNECTED)
+    template <>
+    inline
+    void MeshConnectivity::init (const BasicTriangle & t)
+    {
+      AaUInt a = t.indices [0];
+      AaUInt b = t.indices [1];
+      AaUInt c = t.indices [2];
+
+      m_adjacency [a].insert (b); m_adjacency [b].insert (c); m_adjacency [c].insert (a);
+      m_adjacency [a].insert (c); m_adjacency [c].insert (b); m_adjacency [b].insert (a); 
+    }
+
+    template <>
+    inline
+    bool MeshConnectivity::face_connected (const BasicTriangle & t) const
+    {
+      AaUInt a = t.indices [0];
+      return (m_states [a] == CONNECTED);
+    }
+
+    template <class M>
+    class TMeshSeparator
+    {
+      private:
+        typedef /******/ M         Mesh;
+        typedef typename M::Vertex Vertex;
+        typedef typename M::Face   Face;
+
+      private:
+        std::vector<Mesh *> separate (const Mesh * mesh) const
+        {
+          std::vector<Mesh *> v;
+
+          const std::vector<Vertex> & vertices = mesh->vertices ();
+          const std::vector<Face>   & faces    = mesh->faces    ();
+
+          MeshConnectivity connectivity (mesh);
+
+          for (AaUInt i = 0; i < vertices.size (); ++i)
           {
-            ASSERT (m_states [b] == CONNECTED);
-            ASSERT (m_states [c] == CONNECTED);
-            this->registerTriangle (m, a, b, c);
+            if (connectivity.vertex_ready (i))
+            {
+              Mesh * m = new Mesh;
+
+              TMeshOptimizer<M> optimizer (mesh, m);
+
+              connectivity.flood (i);
+              for (AaUInt i = 0; i < faces.size (); ++i)
+              {
+                const Face & f = faces [i];
+                if (connectivity.face_connected (f))
+                  optimizer.addFace (f);
+              }
+              connectivity.finish ();
+
+              v.push_back (m);
+            }
           }
+
+          return v;
         }
 
-        for (unsigned int i = 0; i < vertices.size (); ++i)
-          if (m_states [i] == CONNECTED)
-          {
-            m_states [i] = DONE;
-            m_adjVertices [i].clear ();
-          }
-
-        m_index.clear ();
-        m_result.push_back (m);
-      }
-
-      // Mesh separation.
-      std::vector<M *> separate (const M * mesh)
-      {
-        // Here comes a new challenger!
-        m_mesh = mesh;
-
-        // Initialization.
-        const std::vector<Vertex>   & vertices  = m_mesh->vertices  ();
-        const std::vector<Triangle> & triangles = m_mesh->triangles ();
-
-        m_states.clear ();
-        m_states.resize (vertices.size (), NOT_CONNECTED);
-
-        for (unsigned int i = 0; i < triangles.size (); ++i)
+      public:
+        std::vector<Mesh *> operator() (const Mesh * mesh) const
         {
-          const Triangle & t = triangles [i];
-          int a = t.indices [0];
-          int b = t.indices [1];
-          int c = t.indices [2];
-          m_adjVertices [a].insert (b); m_adjVertices [a].insert (c);
-          m_adjVertices [b].insert (a); m_adjVertices [b].insert (c);
-          m_adjVertices [c].insert (a); m_adjVertices [c].insert (b);
+          return this->separate (mesh);
         }
+    };
 
-        // Let's go!
-        for (int start = this->findStart (); start != -1; start = this->findStart ())
-        {
-          //std::cout << "start = " << start << std::endl;
-          this->setConnectivity (start);
-          this->finishComponent ();
-        }
-
-        // Free memory.
-        m_mesh = NULL;
-        m_adjVertices.clear ();
-        m_states.clear ();
-        // Pfff !
-        std::vector<M *> r;
-        r.swap (m_result);
-        return r;
-      }
-
-    public:
-      // Constructor.
-      MeshSeparator () :
-        m_mesh (NULL),
-        m_adjVertices (),
-        m_states (),
-        m_index (),
-        m_result ()
-      {
-      }
-
-      // Main method.
-      std::vector<M *> operator() (const M * mesh)
-      {
-        return this->separate (mesh);
-      }
-    }; // class MeshSeparator
   } // namespace msh
 } // namespace aassif
 
-#endif // __AASSIF_MESH_SEPARATOR__
+#endif // AA_MESH_SEPARATOR__H
+

@@ -72,6 +72,21 @@ namespace Aa
         }
     };
 
+    template <>
+    inline
+    VBO * VBO::ElementArray (const std::vector<BasicTriangle> & t, GLenum usage)
+    {
+      std::vector<GLuint> indices (3 * t.size ());
+      for (AaUInt i = 0; i < t.size (); ++i)
+      {
+        indices [3*i + 0] = t[i].indices[0];
+        indices [3*i + 1] = t[i].indices[1];
+        indices [3*i + 2] = t[i].indices[2];
+      }
+
+      return VBO::ElementArray (indices, usage);
+    }
+
 ////////////////////////////////////////////////////////////////////////////////
 // Aa::Mesh::TMeshVBO<M> ///////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -80,54 +95,13 @@ namespace Aa
     class TMeshVBO
     {
       public:
-        typedef M                    Mesh;
-        typedef typename M::Vertex   Vertex;
-        typedef typename M::Triangle Triangle;
+        typedef /******/ M         Mesh;
+        typedef typename M::Vertex Vertex;
+        typedef typename M::Face   Face;
 
       protected:
         VBO * m_vertices;
-        VBO * m_triangles;
-
-      public:
-        static inline
-        VBO * CreateVBO (const std::vector<Vertex> & v, GLenum usage = GL_STATIC_DRAW)
-        {
-          return VBO::Array (v, usage);
-        }
-
-        static inline
-        VBO * CreateVBO (const std::vector<Triangle> & t, GLenum usage = GL_STATIC_DRAW)
-        {
-          std::vector<GLuint> indices (3 * t.size ());
-          for (AaUInt i = 0; i < t.size (); ++i)
-          {
-            indices [3*i + 0] = t[i].indices[0];
-            indices [3*i + 1] = t[i].indices[1];
-            indices [3*i + 2] = t[i].indices[2];
-          }
-
-          return VBO::ElementArray (indices, usage);
-        }
-
-        static inline
-        void SetPointers (const VBO * vbo)
-        {
-          if (vbo != NULL)
-          {
-            glBindBuffer (GL_ARRAY_BUFFER, vbo->id);
-            TMeshRenderer<M>::SetPointers (NULL);
-          }
-        }
-
-        static inline
-        void DrawElements (const VBO * vbo)
-        {
-          if (vbo != NULL)
-          {
-            glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, vbo->id);
-            TMeshRenderer<M>::DrawElements (NULL, vbo->count);
-          }
-        }
+        VBO * m_faces;
 
       protected:
         inline
@@ -135,23 +109,23 @@ namespace Aa
         {
           if (m != NULL)
           {
-            m_vertices  = CreateVBO (m->vertices  ());
-            m_triangles = CreateVBO (m->triangles ());
+            m_vertices = VBO::Array        (m->vertices (), GL_STATIC_DRAW);
+            m_faces    = VBO::ElementArray (m->faces    (), GL_STATIC_DRAW);
           }
         }
 
         inline
         void destroy ()
         {
-          if (m_vertices  != NULL) delete m_vertices;
-          if (m_triangles != NULL) delete m_triangles;
+          if (m_vertices != NULL) delete m_vertices;
+          if (m_faces    != NULL) delete m_faces;
         }
 
       public:
         inline
         TMeshVBO (const Mesh * m = NULL) :
           m_vertices (NULL),
-          m_triangles (NULL)
+          m_faces (NULL)
         {
           create (m);
         }
@@ -167,11 +141,13 @@ namespace Aa
         {
           if (m_vertices != NULL)
           {
-            SetPointers  (m_vertices);
-            DrawElements (m_triangles);
+            glBindBuffer (GL_ARRAY_BUFFER, m_vertices->id);
+            TVertexRenderer<Vertex>::SetPointers (NULL);
+            glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, m_faces->id);
+            TFaceRenderer<Face>::DrawElements (NULL, m_faces->count);
             glBindBuffer (GL_ARRAY_BUFFER, 0);
             glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
-            TMeshRenderer<M>::Disable ();
+            TVertexRenderer<Vertex>::Disable ();
           }
         }
 
@@ -180,10 +156,11 @@ namespace Aa
         {
           if (m_vertices != NULL)
           {
-            SetPointers (m_vertices);
+            glBindBuffer (GL_ARRAY_BUFFER, m_vertices->id);
+            TVertexRenderer<Vertex>::SetPointers (NULL);
             glDrawArrays (GL_POINTS, 0, m_vertices->count);
             glBindBuffer (GL_ARRAY_BUFFER, 0);
-            TMeshRenderer<M>::Disable ();
+            TVertexRenderer<Vertex>::Disable ();
           }
         }
     };

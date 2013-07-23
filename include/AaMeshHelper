@@ -1,4 +1,3 @@
 #include "bits/AaMesh.hh"
 #include "bits/AaMeshHelper.hh"
-#include "bits/AaMeshOptimizer.hh"
 

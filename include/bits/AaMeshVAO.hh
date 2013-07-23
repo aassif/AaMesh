@@ -14,14 +14,14 @@ namespace Aa
     class TMeshVAO
     {
       public:
-        typedef M                    Mesh;
-        typedef typename M::Vertex   Vertex;
-        typedef typename M::Triangle Triangle;
+        typedef /******/ M         Mesh;
+        typedef typename M::Vertex Vertex;
+        typedef typename M::Face   Face;
 
       protected:
         GLuint m_id;
         VBO  * m_vertices;
-        VBO  * m_triangles;
+        VBO  * m_faces;
 
       protected:
         inline
@@ -29,16 +29,16 @@ namespace Aa
         {
           if (m != NULL)
           {
-            m_vertices  = TMeshVBO<M>::CreateVBO (m->vertices  ());
-            m_triangles = TMeshVBO<M>::CreateVBO (m->triangles ());
+            m_vertices = VBO::Array        (m->vertices ());
+            m_faces    = VBO::ElementArray (m->faces    ());
 
             glGenVertexArrays (1, &m_id);
             glBindVertexArray (m_id);
 
             glBindBuffer (GL_ARRAY_BUFFER, m_vertices->id);
-            TMeshRenderer<M>::SetPointers (NULL);
+            TVertexRenderer<Vertex>::SetPointers (NULL);
 
-            glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, m_triangles->id);
+            glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, m_faces->id);
 
             glBindVertexArray (0);
           }
@@ -51,7 +51,7 @@ namespace Aa
           {
             glDeleteVertexArrays (1, &m_id);
             delete m_vertices;
-            delete m_triangles;
+            delete m_faces;
             m_id = 0;
           }
         }
@@ -61,7 +61,7 @@ namespace Aa
         TMeshVAO (const Mesh * m = NULL) :
           m_id (0),
           m_vertices (NULL),
-          m_triangles (NULL)
+          m_faces (NULL)
         {
           create (m);
         }
@@ -71,9 +71,6 @@ namespace Aa
         {
           destroy ();
         }
-
-        inline VBO * vertices  () {return m_vertices;}
-        inline VBO * triangles () {return m_triangles;}
 
         inline
         void bind () const
@@ -85,7 +82,7 @@ namespace Aa
         void draw () const
         {
           if (m_id != 0)
-            TMeshRenderer<M>::DrawElements (NULL, m_triangles->count);
+            TFaceRenderer<Face>::DrawElements (NULL, m_faces->count);
         }
     };
 

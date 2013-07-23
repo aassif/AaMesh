@@ -9,56 +9,81 @@ namespace Aa
   {
 
 ////////////////////////////////////////////////////////////////////////////////
-// Aa::Mesh::MeshOptimizer<M> //////////////////////////////////////////////////
+// Aa::Mesh::TMeshVertexCopy<M> ////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
     template <class M>
-    class MeshOptimizer
+    class TMeshVertexCopy
     {
       public:
-        typedef M                    Mesh;
-        typedef typename M::Vertex   Vertex;
-        typedef typename M::Triangle Triangle;
+        typedef typename M::Vertex Vertex;
+        typedef /******/ AaUInt    Key;
 
       private:
-        M                      * m_input;
-        M                      * m_output;
-        std::map<AaUInt, AaUInt> m_index;
+        const M * m_mesh;
 
       public:
-        MeshOptimizer (M * input, M * output) :
-          m_input  (input),
-          m_output (output),
-          m_index  ()
+        inline
+        TMeshVertexCopy (const M * m) :
+          m_mesh (m)
         {
         }
 
-        AaUInt addVertex (AaUInt k1)
+        inline
+        Vertex operator() (AaUInt k)
         {
-          std::map<AaUInt, AaUInt>::const_iterator found = m_index.find (k1);
-          if (found == m_index.end ())
-          {
-            AaUInt k2 = m_output->addVertex (m_input->vertex (k1));
-            found = m_index.insert (std::make_pair (k1, k2)).first;
-          }
-          return found->second;
-        }
-
-        AaUInt addTriangle (AaUInt k)
-        {
-          const Triangle & t = m_input->triangle (k);
-          AaUInt i0 = this->addVertex (t.indices [0]);
-          AaUInt i1 = this->addVertex (t.indices [1]);
-          AaUInt i2 = this->addVertex (t.indices [2]);
-          return m_output->addTriangle (Triangle (vec (i0, i1, i2)));
-        }
-
-        void addAll ()
-        {
-          const std::vector<Triangle> & triangles = m_input->triangles ();
-          for (AaUInt i = 0; i < triangles.size (); ++i) this->addTriangle (i);
+          return m_mesh->vertex (k);
         }
     };
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TMeshOptimizer<M> /////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    template <class M>
+    class TMeshOptimizer
+    {
+      public:
+        typedef /******/ M         Mesh;
+        typedef typename M::Vertex Vertex;
+        typedef typename M::Face   Face;
+
+        typedef TMeshVertexCopy<M> Generator;
+
+        typedef TMeshHelper<Mesh, Generator> Helper;
+
+      private:
+        Helper m_helper;
+
+      public:
+        inline
+        TMeshOptimizer (const M * input, M * output) :
+          m_helper (output, Generator (input))
+        {
+        }
+
+        inline
+        AaUInt addFace (const Face &);
+
+#if 0
+        inline
+        void addAll ()
+        {
+          const std::vector<Face> & faces = input->faces ();
+          for (AaUInt i = 0; i < faces.size (); ++i) this->addFace (i);
+        }
+#endif
+    };
+
+    template <>
+    inline
+    AaUInt TMeshOptimizer<BasicMesh>::addFace (const BasicTriangle & t)
+    {
+      AaUInt i0 = m_helper.addVertex (t.indices [0]);
+      AaUInt i1 = m_helper.addVertex (t.indices [1]);
+      AaUInt i2 = m_helper.addVertex (t.indices [2]);
+      return m_helper.addFace (BasicTriangle (vec (i0, i1, i2)));
+    }
 
   } // namespace Mesh
 } // namespace Aa

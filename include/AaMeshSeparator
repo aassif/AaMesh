@@ -1,3 +1,5 @@
 #include "bits/AaMesh.hh"
+#include "bits/AaMeshHelper.hh"
+#include "bits/AaMeshOptimizer.hh"
 #include "bits/AaMeshSeparator.hh"
 
