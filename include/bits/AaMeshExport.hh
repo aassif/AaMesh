@@ -26,7 +26,7 @@ namespace Aa
     void export_off (const BasicMesh * mesh, const std::string & filename)
     {
       const std::vector<Mesh::BasicVertex>   & v = mesh->vertices ();
-      const std::vector<Mesh::BasicTriangle> & t = mesh->triangles ();
+      const std::vector<Mesh::BasicTriangle> & t = mesh->faces    ();
 
       std::ofstream ofs (filename.c_str ());
 
@@ -61,7 +61,7 @@ namespace Aa
     void export_vrml (const BasicMesh * mesh, const std::string & filename)
     {
       const std::vector<BasicVertex>   & vertices  = mesh->vertices ();
-      const std::vector<BasicTriangle> & triangles = mesh->triangles ();
+      const std::vector<BasicTriangle> & triangles = mesh->faces    ();
 
       std::ofstream of (filename.c_str ());
       of << "#VRML V2.0 utf8\n"

@@ -85,6 +85,16 @@ namespace Aa
       return m_helper.addFace (BasicTriangle (vec (i0, i1, i2)));
     }
 
+    template <>
+    inline
+    AaUInt TMeshOptimizer<NormalMesh>::addFace (const BasicTriangle & t)
+    {
+      AaUInt i0 = m_helper.addVertex (t.indices [0]);
+      AaUInt i1 = m_helper.addVertex (t.indices [1]);
+      AaUInt i2 = m_helper.addVertex (t.indices [2]);
+      return m_helper.addFace (BasicTriangle (vec (i0, i1, i2)));
+    }
+
   } // namespace Mesh
 } // namespace Aa
 
