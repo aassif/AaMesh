@@ -9,11 +9,11 @@ namespace Aa
   {
 
 ////////////////////////////////////////////////////////////////////////////////
-// Aa::Mesh::TMeshVertexCopy<M> ////////////////////////////////////////////////
+// Aa::Mesh::TVertexCopy<M> ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
     template <class M>
-    class TMeshVertexCopy
+    class TVertexCopy
     {
       public:
         typedef typename M::Vertex Vertex;
@@ -24,7 +24,7 @@ namespace Aa
 
       public:
         inline
-        TMeshVertexCopy (const M * m) :
+        TVertexCopy (const M * m) :
           m_mesh (m)
         {
         }
@@ -48,9 +48,8 @@ namespace Aa
         typedef typename M::Vertex Vertex;
         typedef typename M::Face   Face;
 
-        typedef TMeshVertexCopy<M> Generator;
-
-        typedef TMeshHelper<Mesh, Generator> Helper;
+        typedef TVertexCopy<M>            Generator;
+        typedef TMeshHelper<M, Generator> Helper;
 
       private:
         Helper m_helper;

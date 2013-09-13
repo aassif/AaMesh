@@ -33,7 +33,7 @@ namespace Aa
           m->addVertex (CreateVertex (+1, -1, NORMAL));
           m->addVertex (CreateVertex (+1, +1, NORMAL));
           m->addFace (Face (0, 1, 2));
-          m->addFace (Face (1, 3, 2));
+          m->addFace (Face (3, 2, 1));
           return m;
         }
     };
