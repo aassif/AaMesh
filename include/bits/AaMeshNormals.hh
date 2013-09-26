@@ -66,6 +66,7 @@ namespace Aa
     };
 
     template <>
+    inline
     void TMeshNormals<NormalMesh>::Compute (Mesh * m, const BasicTriangle & t)
     {
       NormalVertex & v0 = m->vertex (t.indices [0]);
@@ -80,6 +81,7 @@ namespace Aa
     }
 
     template <>
+    inline
     TMeshNormals<NormalMesh>::Line
       TMeshNormals<NormalMesh>::Draw (const NormalVertex & v, float f)
     {
