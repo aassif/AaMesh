@@ -44,6 +44,7 @@ namespace Aa
 ////////////////////////////////////////////////////////////////////////////////
 
     template <class M>
+    inline
     typename Extrusion<M>::Section Extrusion<M>::CreateSection (float r, AaUInt n)
     {
       Section section;
@@ -56,6 +57,7 @@ namespace Aa
     }
 
     template <class M>
+    inline
     std::vector<mat4> Extrusion<M>::RMF (const std::vector<vec3> & p)
     {
       const AaUInt n = p.size ();
@@ -91,6 +93,7 @@ namespace Aa
     }
 
     template <class M>
+    inline
     M * Extrusion<M>::Extrude (const std::vector<mat4> & frames, const Section & section)
     {
       M * mesh = new M;
@@ -126,6 +129,7 @@ namespace Aa
     }
 
     template <class M>
+    inline
     M * Extrusion<M>::Extrude (const std::vector<vec3> & points, float r, AaUInt n)
     {
       return Extrusion<M>::Extrude (Extrusion<M>::RMF (points), Extrusion<M>::CreateSection (r, n));
@@ -136,6 +140,7 @@ namespace Aa
 ////////////////////////////////////////////////////////////////////////////////
 
     template <>
+    inline
     NormalVertex Extrusion<NormalMesh>::CreateVertex (float r, float theta)
     {
       float sin_theta = std::sin (theta);
