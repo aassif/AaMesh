@@ -499,13 +499,16 @@ namespace Aa
         const Image * m_image;
 
       public:
+        inline
         TPolygonizerImage (const Image * image) :
           m_image (image)
         {
         }
 
+        inline
         uvec3 dims () const;
 
+        inline
         float operator[] (const uvec3 &) const;
     };
 
@@ -521,17 +524,20 @@ namespace Aa
         float         m_offset;
 
       public:
+        inline
         TPolygonizerOffset (const Image * image, float offset) :
           m_image  (image),
           m_offset (offset)
         {
         }
 
+        inline
         uvec3 dims () const
         {
           return m_image->dims ();
         }
 
+        inline
         float operator[] (const uvec3 & p) const
         {
           return (*m_image) [p] - m_offset;

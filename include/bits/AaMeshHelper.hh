@@ -48,6 +48,9 @@ namespace Aa
         }
 
         inline
+        Mesh * mesh () {return m_mesh;}
+
+        inline
         AaUInt addVertex (Key k)
         {
           typename Index::const_iterator i = m_index.find (k);
