@@ -73,11 +73,15 @@ namespace Aa
       NormalVertex & v1 = m->vertex (t.indices [1]);
       NormalVertex & v2 = m->vertex (t.indices [2]);
 
-      vec3 n = CrossProd (v2.coords - v0.coords, v1.coords - v0.coords);
-
-      v0.normal += n;
-      v1.normal += n;
-      v2.normal += n;
+      vec3 n1 = CrossProd (v2.coords - v0.coords, v1.coords - v0.coords);
+      float d = n1.length ();
+      if (d != 0)
+      {
+        vec3 n2 = n1 / d;
+        v0.normal += n2;
+        v1.normal += n2;
+        v2.normal += n2;
+      }
     }
 
     template <>

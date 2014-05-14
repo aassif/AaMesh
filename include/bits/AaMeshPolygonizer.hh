@@ -65,6 +65,190 @@ namespace Aa
 ////////////////////////////////////////////////////////////////////////////////
 
     template <class I, class M>
+    inline
+    TPolygonizer<I, M>::TPolygonizer (const Image * image,
+                                      Mesh        * mesh,
+                                      mat4          transform) :
+      m_image     (image),
+      m_mesh      (mesh),
+      m_transform (transform)
+    {
+    }
+
+    template <class I, class M>
+    inline
+    void TPolygonizer<I, M>::compute (Iterator first, Iterator last)
+    {
+      while (first != last)
+        this->compute (*(first++));
+    }
+
+    template <class I, class M>
+    inline
+    void TPolygonizer<I, M>::compute ()
+    {
+      this->compute (this->begin (), this->end ());
+    }
+
+    template <class I, class M>
+    inline
+    void TPolygonizer<I, M>::compute (const uvec3 & p)
+    {
+      static const uvec3 OFFSETS [] =
+      {
+        vec (0u, 0u, 0u),
+        vec (0u, 1u, 0u),
+        vec (1u, 1u, 0u),
+        vec (1u, 0u, 0u),
+        vec (0u, 0u, 1u),
+        vec (0u, 1u, 1u),
+        vec (1u, 1u, 1u),
+        vec (1u, 0u, 1u)
+      };
+
+      AaUInt8 key = 0x00;
+      for (AaUInt i = 0; i < 8; ++i)
+        if ((*m_image) [p + OFFSETS[i]] < 0)
+          key |= (1u << i);
+
+      if (EDGES [key] != 0x00)
+      {
+        for (AaUInt i = 0; i < 12; ++i)
+          if (EDGES [key] & (1u << i)) this->compute (p, i);
+
+        for (AaUInt8 i = 0; TRIANGLES [key][i] != -1; i += 3)
+        {
+          AaUInt id0 = m_vertex_index [this->id (p, TRIANGLES [key][i + 0])];
+          AaUInt id1 = m_vertex_index [this->id (p, TRIANGLES [key][i + 1])];
+          AaUInt id2 = m_vertex_index [this->id (p, TRIANGLES [key][i + 2])];
+          m_mesh->addFace (Face (vec (id2, id1, id0)));
+        }
+      }
+    }
+
+    template <class I, class M>
+    inline
+    uvec4 TPolygonizer<I, M>::id (const uvec3 & p, AaUInt edge) const
+    {
+      switch (edge)
+      {
+        case  0: return uvec4 (p + vec (0, 0, 0), 1);
+        case  1: return uvec4 (p + vec (0, 1, 0), 0);
+        case  2: return uvec4 (p + vec (1, 0, 0), 1);
+        case  3: return uvec4 (p + vec (0, 0, 0), 0);
+        case  4: return uvec4 (p + vec (0, 0, 1), 1);
+        case  5: return uvec4 (p + vec (0, 1, 1), 0);
+        case  6: return uvec4 (p + vec (1, 0, 1), 1);
+        case  7: return uvec4 (p + vec (0, 0, 1), 0);
+        case  8: return uvec4 (p + vec (0, 0, 0), 2);
+        case  9: return uvec4 (p + vec (0, 1, 0), 2);
+        case 10: return uvec4 (p + vec (1, 1, 0), 2);
+        case 11: return uvec4 (p + vec (1, 0, 0), 2);
+        default: return uvec4 ();
+      }
+    }
+
+    template <class I, class M>
+    inline
+    void TPolygonizer<I, M>::compute (const uvec3 & p, AaUInt edge)
+    {
+      static const uvec3 OFFSETS [12][2] =
+      {
+        {vec (0, 0, 0), vec (0, 1, 0)},
+        {vec (0, 1, 0), vec (1, 1, 0)},
+        {vec (1, 1, 0), vec (1, 0, 0)},
+        {vec (1, 0, 0), vec (0, 0, 0)},
+        {vec (0, 0, 1), vec (0, 1, 1)},
+        {vec (0, 1, 1), vec (1, 1, 1)},
+        {vec (1, 1, 1), vec (1, 0, 1)},
+        {vec (1, 0, 1), vec (0, 0, 1)},
+        {vec (0, 0, 0), vec (0, 0, 1)},
+        {vec (0, 1, 0), vec (0, 1, 1)},
+        {vec (1, 1, 0), vec (1, 1, 1)},
+        {vec (1, 0, 0), vec (1, 0, 1)},
+      };
+
+      uvec4 id = this->id (p, edge);
+      if (m_vertex_index.find (id) == m_vertex_index.end ())
+      {
+        uvec3 p1 = p + OFFSETS [edge][0];
+        uvec3 p2 = p + OFFSETS [edge][1];
+        vec3 vertex = this->compute (p1, p2);
+        AaUInt index = m_mesh->addVertex (Vertex (vertex));
+        m_vertex_index.insert (std::make_pair (id, index));
+      }
+    }
+
+    template <class I, class M>
+    inline
+    vec3 TPolygonizer<I, M>::compute (const uvec3 & p1, const uvec3 & p2) const
+    {
+      float v1 = (*m_image) [p1];
+      float v2 = (*m_image) [p2];
+      float w = (v1 != v2) ? (0 - v1) / (v2 - v1) : 0.5f;
+      vec3 p = (1.0f - w) * p1 + w * p2;
+      return m_transform * vec4 (p / m_image->dims (), 1.0f);
+    }
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TPolygonizerImage<I> //////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    template <class Image>
+    class TPolygonizerImage
+    {
+      private:
+        const Image * m_image;
+
+      public:
+        inline
+        TPolygonizerImage (const Image * image) :
+          m_image (image)
+        {
+        }
+
+        inline
+        uvec3 dims () const;
+
+        inline
+        float operator[] (const uvec3 &) const;
+    };
+
+////////////////////////////////////////////////////////////////////////////////
+// Aa::Mesh::TPolygonizerOffset<I> /////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    template <class Image>
+    class TPolygonizerOffset
+    {
+      private:
+        const Image * m_image;
+        float         m_offset;
+
+      public:
+        inline
+        TPolygonizerOffset (const Image * image, float offset) :
+          m_image  (image),
+          m_offset (offset)
+        {
+        }
+
+        inline
+        uvec3 dims () const
+        {
+          return m_image->dims ();
+        }
+
+        inline
+        float operator[] (const uvec3 & p) const
+        {
+          return (*m_image) [p] - m_offset;
+        }
+    };
+
+////////////////////////////////////////////////////////////////////////////////
+
+    template <class I, class M>
     const AaUInt16 TPolygonizer<I, M>::EDGES [256] =
     {
       0x000, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
@@ -360,188 +544,6 @@ namespace Aa
       { 0,  9,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       { 0,  3,  8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
       {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
-    };
-
-    template <class I, class M>
-    inline
-    TPolygonizer<I, M>::TPolygonizer (const Image * image,
-                                      Mesh        * mesh,
-                                      mat4          transform) :
-      m_image     (image),
-      m_mesh      (mesh),
-      m_transform (transform)
-    {
-    }
-
-    template <class I, class M>
-    inline
-    void TPolygonizer<I, M>::compute (Iterator first, Iterator last)
-    {
-      while (first != last)
-        this->compute (*(first++));
-    }
-
-    template <class I, class M>
-    inline
-    void TPolygonizer<I, M>::compute ()
-    {
-      this->compute (this->begin (), this->end ());
-    }
-
-    template <class I, class M>
-    inline
-    void TPolygonizer<I, M>::compute (const uvec3 & p)
-    {
-      static const uvec3 OFFSETS [] =
-      {
-        vec (0u, 0u, 0u),
-        vec (0u, 1u, 0u),
-        vec (1u, 1u, 0u),
-        vec (1u, 0u, 0u),
-        vec (0u, 0u, 1u),
-        vec (0u, 1u, 1u),
-        vec (1u, 1u, 1u),
-        vec (1u, 0u, 1u)
-      };
-
-      AaUInt8 key = 0x00;
-      for (AaUInt i = 0; i < 8; ++i)
-        if ((*m_image) [p + OFFSETS[i]] < 0)
-          key |= (1u << i);
-
-      if (EDGES [key] != 0x00)
-      {
-        for (AaUInt i = 0; i < 12; ++i)
-          if (EDGES [key] & (1u << i)) this->compute (p, i);
-
-        for (AaUInt8 i = 0; TRIANGLES [key][i] != -1; i += 3)
-        {
-          AaUInt id0 = m_vertex_index [this->id (p, TRIANGLES [key][i + 0])];
-          AaUInt id1 = m_vertex_index [this->id (p, TRIANGLES [key][i + 1])];
-          AaUInt id2 = m_vertex_index [this->id (p, TRIANGLES [key][i + 2])];
-          m_mesh->addFace (Face (vec (id2, id1, id0)));
-        }
-      }
-    }
-
-    template <class I, class M>
-    inline
-    uvec4 TPolygonizer<I, M>::id (const uvec3 & p, AaUInt edge) const
-    {
-      switch (edge)
-      {
-        case  0: return uvec4 (p + vec (0, 0, 0), 1);
-        case  1: return uvec4 (p + vec (0, 1, 0), 0);
-        case  2: return uvec4 (p + vec (1, 0, 0), 1);
-        case  3: return uvec4 (p + vec (0, 0, 0), 0);
-        case  4: return uvec4 (p + vec (0, 0, 1), 1);
-        case  5: return uvec4 (p + vec (0, 1, 1), 0);
-        case  6: return uvec4 (p + vec (1, 0, 1), 1);
-        case  7: return uvec4 (p + vec (0, 0, 1), 0);
-        case  8: return uvec4 (p + vec (0, 0, 0), 2);
-        case  9: return uvec4 (p + vec (0, 1, 0), 2);
-        case 10: return uvec4 (p + vec (1, 1, 0), 2);
-        case 11: return uvec4 (p + vec (1, 0, 0), 2);
-        default: return uvec4 ();
-      }
-    }
-
-    template <class I, class M>
-    inline
-    void TPolygonizer<I, M>::compute (const uvec3 & p, AaUInt edge)
-    {
-      static const uvec3 OFFSETS [12][2] =
-      {
-        {vec (0, 0, 0), vec (0, 1, 0)},
-        {vec (0, 1, 0), vec (1, 1, 0)},
-        {vec (1, 1, 0), vec (1, 0, 0)},
-        {vec (1, 0, 0), vec (0, 0, 0)},
-        {vec (0, 0, 1), vec (0, 1, 1)},
-        {vec (0, 1, 1), vec (1, 1, 1)},
-        {vec (1, 1, 1), vec (1, 0, 1)},
-        {vec (1, 0, 1), vec (0, 0, 1)},
-        {vec (0, 0, 0), vec (0, 0, 1)},
-        {vec (0, 1, 0), vec (0, 1, 1)},
-        {vec (1, 1, 0), vec (1, 1, 1)},
-        {vec (1, 0, 0), vec (1, 0, 1)},
-      };
-
-      uvec4 id = this->id (p, edge);
-      if (m_vertex_index.find (id) == m_vertex_index.end ())
-      {
-        uvec3 p1 = p + OFFSETS [edge][0];
-        uvec3 p2 = p + OFFSETS [edge][1];
-        vec3 vertex = this->compute (p1, p2);
-        AaUInt index = m_mesh->addVertex (Vertex (vertex));
-        m_vertex_index.insert (std::make_pair (id, index));
-      }
-    }
-
-    template <class I, class M>
-    inline
-    vec3 TPolygonizer<I, M>::compute (const uvec3 & p1, const uvec3 & p2) const
-    {
-      float v1 = (*m_image) [p1];
-      float v2 = (*m_image) [p2];
-      float w = (v1 != v2) ? (0 - v1) / (v2 - v1) : 0.5f;
-      vec3 p = (1.0f - w) * p1 + w * p2;
-      return m_transform * vec4 (p / m_image->dims (), 1.0f);
-    }
-
-////////////////////////////////////////////////////////////////////////////////
-// Aa::Mesh::TPolygonizerImage<I> //////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-    template <class Image>
-    class TPolygonizerImage
-    {
-      private:
-        const Image * m_image;
-
-      public:
-        inline
-        TPolygonizerImage (const Image * image) :
-          m_image (image)
-        {
-        }
-
-        inline
-        uvec3 dims () const;
-
-        inline
-        float operator[] (const uvec3 &) const;
-    };
-
-////////////////////////////////////////////////////////////////////////////////
-// Aa::Mesh::TPolygonizerOffset<I> /////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-    template <class Image>
-    class TPolygonizerOffset
-    {
-      private:
-        const Image * m_image;
-        float         m_offset;
-
-      public:
-        inline
-        TPolygonizerOffset (const Image * image, float offset) :
-          m_image  (image),
-          m_offset (offset)
-        {
-        }
-
-        inline
-        uvec3 dims () const
-        {
-          return m_image->dims ();
-        }
-
-        inline
-        float operator[] (const uvec3 & p) const
-        {
-          return (*m_image) [p] - m_offset;
-        }
     };
 
   } // namespace Mesh
