@@ -82,7 +82,10 @@ namespace Aa
         void draw () const
         {
           if (m_id != 0)
+          {
+            this->bind ();
             TFaceRenderer<Face>::DrawElements (NULL, m_faces->count);
+          }
         }
     };
 

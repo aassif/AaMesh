@@ -1,7 +1,11 @@
 #ifndef AA_MESH_NORMALS__H
 #define AA_MESH_NORMALS__H
 
-#include <GL/glew.h>
+#ifdef __APPLE__
+  #include <OpenGL/gl3.h>
+#else
+  #include <GL/glew.h>
+#endif
 
 namespace Aa
 {
