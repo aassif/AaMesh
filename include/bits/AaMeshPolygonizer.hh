@@ -207,10 +207,10 @@ namespace Aa
         {
         }
 
-        inline
+        //inline
         uvec3 dims () const;
 
-        inline
+        //inline
         float operator[] (const uvec3 &) const;
     };
 

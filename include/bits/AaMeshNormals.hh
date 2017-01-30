@@ -52,20 +52,22 @@ namespace Aa
         inline static
         void Draw (const Mesh * m, float f = 1.0f)
         {
-          std::vector<Line> lines;
-
           const std::vector<Vertex> & v = m->vertices ();
-          for (AaUInt i = 0; i < v.size (); ++i)
-            lines.push_back (TMeshNormals<M>::Draw (v[i]));
+          if (! v.empty ())
+          {
+            std::vector<Line> lines;
+            for (AaUInt i = 0; i < v.size (); ++i)
+              lines.push_back (TMeshNormals<M>::Draw (v[i], f));
 
-          GLuint vbo = 0;
-          glGenBuffers (1, &vbo);
-          glBindBuffer (GL_ARRAY_BUFFER, vbo);
-          glBufferData (GL_ARRAY_BUFFER, lines.size () * sizeof (Line), lines.empty () ? NULL : &(lines[0][0][0]), GL_STATIC_DRAW);
-          glEnableVertexAttribArray (0);
-          glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-          glDrawArrays (GL_LINES, 0, 2 * lines.size ());
-          glDisableVertexAttribArray (0);
+            GLuint vbo = 0;
+            glGenBuffers (1, &vbo);
+            glBindBuffer (GL_ARRAY_BUFFER, vbo);
+            glBufferData (GL_ARRAY_BUFFER, lines.size () * sizeof (Line), &(lines[0][0][0]), GL_STATIC_DRAW);
+            glEnableVertexAttribArray (0);
+            glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+            glDrawArrays (GL_LINES, 0, 2 * lines.size ());
+            glDisableVertexAttribArray (0);
+          }
         }
     };
 
