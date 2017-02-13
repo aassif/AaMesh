@@ -11,7 +11,7 @@ namespace Aa
   {
 
 ////////////////////////////////////////////////////////////////////////////////
-// Aa::Mesh::TDisk<M> //////////////////////////////////////////////////////////
+// Aa::Mesh::TQuad<M> //////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
     template <class M>
@@ -86,22 +86,22 @@ namespace Aa
 
           static const vec3 NORMALS [6] =
           {
-            vec<float> ( 0,  0, -1),
-            vec<float> ( 0,  0, +1),
+            vec<float> (-1,  0,  0),
+            vec<float> (+1,  0,  0),
             vec<float> ( 0, -1,  0),
             vec<float> ( 0, +1,  0),
-            vec<float> (-1,  0,  0),
-            vec<float> (+1,  0,  0)
+            vec<float> ( 0,  0, -1),
+            vec<float> ( 0,  0, +1)
           };
 
           static const AaUInt FACES [6][4] = 
           {
-            {0, 4, 6, 2},
-            {5, 1, 3, 7},
-            {0, 1, 5, 4},
-            {6, 7, 3, 2},
-            {0, 2, 3, 1},
-            {4, 5, 7, 6},
+            {2, 0, 6, 4}, // LEFT
+            {1, 3, 5, 7}, // RIGHT
+            {0, 1, 4, 5}, // BOTTOM
+            {3, 2, 7, 6}, // TOP
+            {1, 0, 3, 2}, // FAR
+            {4, 5, 6, 7}  // NEAR
           };
 
           M * m = new M;
@@ -113,7 +113,7 @@ namespace Aa
             AaUInt v2 = m->addVertex (CreateVertex (POSITIONS[FACES[i][2]], n));
             AaUInt v3 = m->addVertex (CreateVertex (POSITIONS[FACES[i][3]], n));
             m->addFace (vec (v0, v1, v2));
-            m->addFace (vec (v0, v2, v3));
+            m->addFace (vec (v2, v1, v3));
           }
           return m;
         }
