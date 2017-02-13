@@ -29,11 +29,11 @@ namespace Aa
         {
           if (m != NULL)
           {
-            m_vertices = VBO::Array        (m->vertices ());
-            m_faces    = VBO::ElementArray (m->faces    ());
-
             glGenVertexArrays (1, &m_id);
             glBindVertexArray (m_id);
+
+            m_vertices = VBO::Array        (m->vertices ());
+            m_faces    = VBO::ElementArray (m->faces    ());
 
             glBindBuffer (GL_ARRAY_BUFFER, m_vertices->id);
             TVertexRenderer<Vertex>::SetPointers (NULL);
@@ -83,8 +83,9 @@ namespace Aa
         {
           if (m_id != 0)
           {
-            this->bind ();
+            glBindVertexArray (m_id);
             TFaceRenderer<Face>::DrawElements (NULL, m_faces->count);
+            glBindVertexArray (0);
           }
         }
     };
