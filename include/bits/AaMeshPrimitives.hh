@@ -31,7 +31,7 @@ namespace Aa
         M * Create ()
         {
           M * m = new M;
-          static const vec3 NORMAL = vec<float> (0, 0, 1);
+          static const vec3 NORMAL {0, 0, 1};
           m->addVertex (CreateVertex (-1, -1, NORMAL));
           m->addVertex (CreateVertex (-1, +1, NORMAL));
           m->addVertex (CreateVertex (+1, -1, NORMAL));
@@ -74,24 +74,24 @@ namespace Aa
         {
           static const vec3 POSITIONS [8] =
           {
-            vec<float> (0, 0, 0),
-            vec<float> (1, 0, 0),
-            vec<float> (0, 1, 0),
-            vec<float> (1, 1, 0),
-            vec<float> (0, 0, 1),
-            vec<float> (1, 0, 1),
-            vec<float> (0, 1, 1),
-            vec<float> (1, 1, 1)
+            {0, 0, 0},
+            {1, 0, 0},
+            {0, 1, 0},
+            {1, 1, 0},
+            {0, 0, 1},
+            {1, 0, 1},
+            {0, 1, 1},
+            {1, 1, 1}
           };
 
           static const vec3 NORMALS [6] =
           {
-            vec<float> (-1,  0,  0),
-            vec<float> (+1,  0,  0),
-            vec<float> ( 0, -1,  0),
-            vec<float> ( 0, +1,  0),
-            vec<float> ( 0,  0, -1),
-            vec<float> ( 0,  0, +1)
+            {-1,  0,  0},
+            {+1,  0,  0},
+            { 0, -1,  0},
+            { 0, +1,  0},
+            { 0,  0, -1},
+            { 0,  0, +1}
           };
 
           static const AaUInt FACES [6][4] = 
