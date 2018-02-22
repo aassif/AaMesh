@@ -25,15 +25,15 @@ namespace Aa
 
       protected:
         inline
-        void create (const Mesh * m)
+        void create (const Mesh * m, GLenum usage)
         {
           if (m != NULL)
           {
             glGenVertexArrays (1, &m_id);
             glBindVertexArray (m_id);
 
-            m_vertices = VBO::Array        (m->vertices ());
-            m_faces    = VBO::ElementArray (m->faces    ());
+            m_vertices = VBO::Array        (m->vertices (), usage);
+            m_faces    = VBO::ElementArray (m->faces    (), usage);
 
             glBindBuffer (GL_ARRAY_BUFFER, m_vertices->id);
             TVertexRenderer<Vertex>::SetPointers (NULL);
@@ -58,12 +58,12 @@ namespace Aa
 
       public:
         inline
-        TMeshVAO (const Mesh * m = NULL) :
+        TMeshVAO (const Mesh * m = NULL, GLenum usage = GL_STATIC_DRAW) :
           m_id (0),
           m_vertices (NULL),
           m_faces (NULL)
         {
-          create (m);
+          create (m, usage);
         }
 
         inline

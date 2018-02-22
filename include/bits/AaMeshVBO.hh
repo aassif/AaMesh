@@ -105,12 +105,12 @@ namespace Aa
 
       protected:
         inline
-        void create (const Mesh * m)
+        void create (const Mesh * m, GLenum usage)
         {
           if (m != NULL)
           {
-            m_vertices = VBO::Array        (m->vertices (), GL_STATIC_DRAW);
-            m_faces    = VBO::ElementArray (m->faces    (), GL_STATIC_DRAW);
+            m_vertices = VBO::Array        (m->vertices (), usage);
+            m_faces    = VBO::ElementArray (m->faces    (), usage);
           }
         }
 
@@ -123,11 +123,11 @@ namespace Aa
 
       public:
         inline
-        TMeshVBO (const Mesh * m = NULL) :
+        TMeshVBO (const Mesh * m = NULL, GLenum usage = GL_STATIC_DRAW) :
           m_vertices (NULL),
           m_faces (NULL)
         {
-          create (m);
+          create (m, usage);
         }
 
         inline
